@@ -30,6 +30,7 @@
     "@vue/eslint-config-typescript": "^13.0.0",
     "@vue/test-utils": "^2.4.5",
     "@vue/tsconfig": "^0.5.1",
+    "airbnb": "^0.0.2",
     "cypress": "^13.7.2",
     "eslint": "^8.57.0",
     "eslint-plugin-cypress": "^2.15.1",
