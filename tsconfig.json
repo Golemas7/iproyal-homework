@@ -12,6 +12,10 @@
     }
   ],
   "compilerOptions": {
-    "module": "NodeNext"
+    "module": "NodeNext",
+    "paths": {
+      "@/*": ["./src/*"],
+      "@/components/*": ["./src/components/*", "./src/components/*/index.ts"]
+    }
   }
 }
