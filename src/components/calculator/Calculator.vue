@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, inject, reactive, ref, watch, type Ref } from 'vue'
 import type { ResultAndAction } from './ResultAndAction.vue'
+import type { History, HistoryItem } from './History.vue'
 
 type CalculatorActions = 'C' | '^' | '%' | '/' | 'X' | '-' | '+' | '='
 type CalculatorNumbers = '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9'
@@ -22,6 +23,9 @@ const calculatorRegExp = /^[Cc\^%/789Xx456\-123\+0.=]+$/
 const { value: calculation } = inject<Ref<ResultAndAction>>(
   'resultAndAction'
 ) as Ref<ResultAndAction>
+
+// Inject the data for binding with history
+const { value: history } = inject<Ref<History>>('history') as Ref<History>
 
 onMounted(() => {
   window.addEventListener('keydown', calculatorKeydown)
@@ -61,6 +65,8 @@ const handleCalculationAction = (
 const parseValueFromString = (value: string): number => {
   return value.includes('.') ? parseFloat(value) : parseInt(value)
 }
+
+// TODO IF EQUAL IS PRESSED AND WE START TYPING, START A NEW CALCULATION
 
 /**
  * We use strings to represent current and history values, which are parsed only when needed for calculations. This makes the process of adding numbers to the end and handling floating points a lot easier.
@@ -126,6 +132,15 @@ const handleCalculationValue = (value: string, digit: CalculatorButton) => {
           calculation.action as CalculatorActions
         )
 
+        const newHistoryItem = {
+          value1: calculation.previousValue,
+          action: calculation.action,
+          value2: calculation.value,
+          result: calculatedValue?.toString() || ''
+        }
+
+        history.items.push(newHistoryItem)
+
         calculation.previousValue = calculatedValue?.toString() || ''
 
         // Set current value to empty string
@@ -177,4 +192,16 @@ const handleButtonClick = (buttonValue: CalculatorButton) => {
 }
 
 calculation.onButtonClick = handleButtonClick
+
+const handleHistoryClick = (hisotryItem: HistoryItem) => {
+  const { value1, action, value2 } = hisotryItem
+
+  calculation.action = action
+  calculation.previousValue = value1
+  calculation.actionStarted = true
+  calculation.fakeDecimal = false
+  calculation.value = value2
+}
+
+history.setCurrentCalculationToEntry = handleHistoryClick
 </script>

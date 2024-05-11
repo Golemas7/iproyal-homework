@@ -66,7 +66,7 @@ const handleButtonClick = (e: CalculatorButton) => {
         <span>...</span>
       </div>
       <div class="screen">
-        <History />
+        <History has-calculator />
 
         <div class="history">
           <template v-if="calculation.previousValue">
@@ -134,11 +134,13 @@ const handleButtonClick = (e: CalculatorButton) => {
   align-items: flex-end;
   margin-bottom: 60px;
   box-shadow: 5px 5px 60px 0px rgba(11, 11, 11, 0.1);
+  overflow: hidden;
 }
 
 .history {
   font-size: 2.5rem;
   color: #9e9c9c;
+  min-height: 4rem;
 }
 
 .current {
