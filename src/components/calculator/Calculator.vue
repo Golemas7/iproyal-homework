@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, inject, reactive, ref, watch, type Ref } from 'vue'
-import { ResultAndAction } from './ResultAndAction.vue'
+import type { ResultAndAction } from './ResultAndAction.vue'
 
 type CalculatorActions = 'C' | '^' | '%' | '/' | 'X' | '-' | '+' | '='
 type CalculatorNumbers = '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9'
@@ -19,23 +19,9 @@ const numberButtons = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
 const calculatorRegExp = /^[Cc\^%/789Xx456\-123\+0.=]+$/
 
 // Inject the data for binding with result and action
-const calculation: ResultAndAction = inject<ResultAndAction>('resultAndAction')
-
-console.log('calculation', calculation)
-// Override the method for buttonClick
-//  reactive<{
-//   value: string
-//   action: string
-//   actionStarted: boolean
-//   previousValue: string
-//   fakeDecimal: boolean
-// }>({
-//   value: '0',
-//   action: '',
-//   actionStarted: false,
-//   previousValue: '',
-//   fakeDecimal: false
-// })
+const { value: calculation } = inject<Ref<ResultAndAction>>(
+  'resultAndAction'
+) as Ref<ResultAndAction>
 
 onMounted(() => {
   window.addEventListener('keydown', calculatorKeydown)
@@ -190,21 +176,5 @@ const handleButtonClick = (buttonValue: CalculatorButton) => {
   handleButtonInput(calculation.value, buttonValue.toString())
 }
 
-// const visibleValue = computed(() => {
-//   if (calculation.value === '') {
-//     if (calculation.fakeDecimal) {
-//       return '0'
-//     }
-
-//     return calculation.previousValue
-//   }
-
-//   return calculation.value
-// })
+calculation.onButtonClick = handleButtonClick
 </script>
-
-<template>
-  <div>Calc</div>
-</template>
-
-<style scoped></style>

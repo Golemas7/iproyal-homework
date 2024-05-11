@@ -66,6 +66,8 @@ const handleButtonClick = (e: CalculatorButton) => {
         <span>...</span>
       </div>
       <div class="screen">
+        <History />
+
         <div class="history">
           <template v-if="calculation.previousValue">
             <span>{{ calculation.previousValue }}</span>
@@ -95,7 +97,6 @@ const handleButtonClick = (e: CalculatorButton) => {
       </div>
     </div>
   </div>
-  <History />
 </template>
 
 <style scoped>
