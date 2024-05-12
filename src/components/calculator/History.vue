@@ -153,6 +153,10 @@ const parseCsvStringToHistoryItems = (csvString: string) => {
   return items
 }
 
+const onHistoryClear = () => {
+  history.value.items = []
+}
+
 watch(importData, (data) => {
   if (!!data) {
     const importedHistoryItems = parseCsvStringToHistoryItems(data)
@@ -169,14 +173,17 @@ watch(importData, (data) => {
 
 <template>
   <div class="history" :class="{ 'history--history-mode': isHistoryMode }">
-    <Button
-      v-for="historyItem in sortedItems"
-      as-icon
-      class="history-entry"
-      @click="handleButtonClick(historyItem)"
-    >
-      {{ `${historyItem.value1} ${historyItem.action} ${historyItem.value2}` }}
-    </Button>
+    <template v-if="sortedItems?.length > 0">
+      <Button
+        v-for="historyItem in sortedItems"
+        as-icon
+        class="history-entry"
+        @click="handleButtonClick(historyItem)"
+      >
+        {{ `${historyItem.value1} ${historyItem.action} ${historyItem.value2}` }}
+      </Button>
+    </template>
+    <span v-else-if="isHistoryMode">No history found</span>
   </div>
   <div v-if="isHistoryMode" class="history-actions">
     <Button class="history-action" @click="onHistoryImport">Import</Button>
@@ -189,6 +196,7 @@ watch(importData, (data) => {
       accept=".xls,.xlsx,.csv"
       @change="readFileData($event)"
     />
+    <Button type="Secondary" class="history-action" @click="onHistoryClear">Clear</Button>
   </div>
   <Calculator />
 </template>
