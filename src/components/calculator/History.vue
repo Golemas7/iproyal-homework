@@ -236,16 +236,16 @@ watch(importData, (data) => {
 
 .history-actions {
   position: absolute;
-  bottom: -4rem;
+  bottom: -5rem;
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
   width: 100%;
   right: 0;
   font-size: 1.563rem;
   gap: 2rem;
 
   .history-action {
-    padding: 0.25rem 1rem;
+    padding: 0.75rem 1rem;
   }
 
   .history-action--hidden {
