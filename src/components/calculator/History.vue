@@ -2,10 +2,6 @@
 import { provide, ref } from 'vue'
 import Calculator from './Calculator.vue'
 
-defineProps<{
-  hasCalculator?: boolean
-}>()
-
 export type HistoryItem = {
   value1: string
   action: string
@@ -36,9 +32,7 @@ provide('history', history)
       {{ `${historyItem.value1} ${historyItem.action} ${historyItem.value2}` }}
     </button>
   </div>
-  <template v-if="hasCalculator">
-    <Calculator />
-  </template>
+  <Calculator />
 </template>
 
 <style scoped>

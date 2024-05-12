@@ -1,7 +1,12 @@
 <script setup lang="ts">
-import { computed, provide, ref } from 'vue'
+import { computed, provide, reactive, ref } from 'vue'
+
+// TODO HANDLE ABSOLUTE PATHS
+import ArrowLeftIcon from '../icons/IconArrowLeft.vue'
+import MoreIcon from '../icons/IconMore.vue'
 
 import History from './History.vue'
+import Button from '../Button.vue'
 
 export type ResultAndAction = {
   value: string
@@ -38,6 +43,8 @@ const calculation = ref<ResultAndAction>({
 
 provide('resultAndAction', calculation)
 
+const isHistoryMode = ref(false)
+
 const visibleValue = computed(() => {
   const { value, fakeDecimal, previousValue } = calculation.value
 
@@ -61,23 +68,32 @@ const handleButtonClick = (e: CalculatorButton) => {
   <div class="calculator">
     <div class="calculator-inner-container">
       <div class="calculator-header">
-        <span>←</span>
+        <Button>
+          <ArrowLeftIcon />
+        </Button>
         <h1 class="title">Calculator</h1>
-        <span>...</span>
+        <Button>
+          <MoreIcon />
+        </Button>
       </div>
       <div class="screen">
-        <History has-calculator />
+        <template v-if="!isHistoryMode">
+          <History />
 
-        <div class="history">
-          <template v-if="calculation.previousValue">
-            <span>{{ calculation.previousValue }}</span>
-            <span>{{ ` ${calculation.action}` }}</span>
-          </template>
-        </div>
+          <div class="history">
+            <template v-if="calculation.previousValue">
+              <span>{{ calculation.previousValue }}</span>
+              <span>{{ ` ${calculation.action}` }}</span>
+            </template>
+          </div>
 
-        <div class="current">
-          <span>{{ visibleValue }}{{ calculation.fakeDecimal ? '.' : '' }}</span>
-        </div>
+          <div class="current">
+            <span>{{ visibleValue }}{{ calculation.fakeDecimal ? '.' : '' }}</span>
+          </div>
+        </template>
+        <template v-else>
+          <History />
+        </template>
       </div>
       <div class="buttons-container">
         <template v-for="buttonsRow in buttons">
@@ -117,6 +133,7 @@ const handleButtonClick = (e: CalculatorButton) => {
 
 .calculator-header {
   display: flex;
+  align-items: center;
   justify-content: space-between;
   margin-bottom: 2.5rem;
   color: white;
