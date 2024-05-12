@@ -2,8 +2,6 @@
 import { computed, provide, reactive, ref } from 'vue'
 
 // TODO HANDLE ABSOLUTE PATHS
-import ArrowLeftIcon from '../icons/IconArrowLeft.vue'
-import MoreIcon from '../icons/IconMore.vue'
 
 import History from './History.vue'
 import Button from '../Button.vue'
@@ -40,10 +38,10 @@ const calculation = ref<ResultAndAction>({
   fakeDecimal: false,
   onButtonClick: (e: CalculatorButton) => {}
 })
+const isHistoryMode = ref(false)
 
 provide('resultAndAction', calculation)
-
-const isHistoryMode = ref(false)
+provide('isHistoryMode', isHistoryMode)
 
 const visibleValue = computed(() => {
   const { value, fakeDecimal, previousValue } = calculation.value
@@ -68,18 +66,19 @@ const handleButtonClick = (e: CalculatorButton) => {
   <div class="calculator">
     <div class="calculator-inner-container">
       <div class="calculator-header">
-        <Button>
-          <ArrowLeftIcon />
+        <Button as-icon @click="isHistoryMode = false">
+          <h1 v-if="!isHistoryMode" class="title title--active">Calculator</h1>
+          <h2 v-else class="title">Calculator</h2>
         </Button>
-        <h1 class="title">Calculator</h1>
-        <Button>
-          <MoreIcon />
+        <Button as-icon @click="isHistoryMode = true">
+          <h1 v-if="isHistoryMode" class="title title--active">History</h1>
+          <h2 v-else class="title">History</h2>
         </Button>
       </div>
-      <div class="screen">
-        <template v-if="!isHistoryMode">
-          <History />
+      <div class="screen" :class="{ 'screen--history-mode': isHistoryMode }">
+        <History />
 
+        <template v-if="!isHistoryMode">
           <div class="history">
             <template v-if="calculation.previousValue">
               <span>{{ calculation.previousValue }}</span>
@@ -91,23 +90,20 @@ const handleButtonClick = (e: CalculatorButton) => {
             <span>{{ visibleValue }}{{ calculation.fakeDecimal ? '.' : '' }}</span>
           </div>
         </template>
-        <template v-else>
-          <History />
-        </template>
       </div>
-      <div class="buttons-container">
+      <div v-if="!isHistoryMode" class="buttons-container">
         <template v-for="buttonsRow in buttons">
           <template v-for="button in buttonsRow">
-            <button
+            <Button
+              :type="numberButtons.includes(button) ? 'Secondary' : 'Primary'"
               class="calculator-button"
               @click="handleButtonClick(button)"
               :class="{
-                'two-rows': button === '+',
-                'number-button': numberButtons.includes(button)
+                'two-rows': button === '+'
               }"
             >
               {{ button }}
-            </button>
+            </Button>
           </template>
         </template>
       </div>
@@ -129,14 +125,21 @@ const handleButtonClick = (e: CalculatorButton) => {
 
 .title {
   font-size: 1rem;
+  padding-bottom: 0.25rem;
+  color: white;
+}
+
+.title--active {
+  border-bottom: 1.5px solid white;
 }
 
 .calculator-header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   margin-bottom: 2.5rem;
   color: white;
+  gap: 2rem;
 }
 
 .screen {
@@ -154,10 +157,18 @@ const handleButtonClick = (e: CalculatorButton) => {
   overflow: hidden;
 }
 
+.screen--history-mode {
+  height: 700px;
+  position: relative;
+  overflow: visible;
+}
+
 .history {
   font-size: 2.5rem;
   color: #9e9c9c;
-  min-height: 4rem;
+  min-height: 6rem;
+  display: flex;
+  align-items: flex-end;
 }
 
 .current {
@@ -188,7 +199,7 @@ const handleButtonClick = (e: CalculatorButton) => {
   border-radius: 42.5px;
 }
 
-.calculator-button:not(.number-button) {
+/* .calculator-button:not(.number-button) {
   background-color: #5a5757;
   box-shadow: 5px 5px 40px 0px rgba(11, 11, 11, 0.3);
 }
@@ -200,5 +211,5 @@ const handleButtonClick = (e: CalculatorButton) => {
 
 button {
   cursor: pointer;
-}
+} */
 </style>

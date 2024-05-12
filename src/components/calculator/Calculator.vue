@@ -136,7 +136,8 @@ const handleCalculationValue = (value: string, digit: CalculatorButton) => {
           value1: calculation.previousValue,
           action: calculation.action,
           value2: calculation.value,
-          result: calculatedValue?.toString() || ''
+          result: calculatedValue?.toString() || '',
+          timeStamp: new Date()
         }
 
         history.items.push(newHistoryItem)
