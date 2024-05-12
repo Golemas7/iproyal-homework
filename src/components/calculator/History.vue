@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { computed, inject, provide, ref, type Ref } from 'vue'
+import { computed, inject, onBeforeUnmount, onMounted, provide, ref, watch, type Ref } from 'vue'
 import Calculator from './Calculator.vue'
 import Button from '../Button.vue'
+import { it } from 'node:test'
 
 export type HistoryItem = {
   value1: string
@@ -15,6 +16,9 @@ export type History = {
   items: HistoryItem[]
   setCurrentCalculationToEntry: (entry: HistoryItem) => void
 }
+
+const input = ref<HTMLInputElement | null>(null)
+const importData = ref<string>('')
 
 const history = ref<History>({
   items: [],
@@ -33,13 +37,14 @@ const handleButtonClick = (historyItem: HistoryItem) => {
 const sortedItems = computed(() => {
   const unsortedItems = [...history.value.items]
 
-  let sortedItems = unsortedItems
+  let sortedItemsArray = unsortedItems
 
-  if (isHistoryMode.value) {
-    sortedItems = unsortedItems.sort((a, b) => (a > b ? -1 : 1))
+  sortedItemsArray = unsortedItems.sort((a, b) => b.timeStamp - a.timeStamp)
+
+  if (!isHistoryMode.value) {
+    sortedItemsArray = sortedItemsArray.reverse()
   }
-
-  return sortedItems
+  return [...sortedItemsArray]
 })
 
 const saveToFile = (filename: string, data: string) => {
@@ -60,13 +65,13 @@ const saveToFile = (filename: string, data: string) => {
   }
 }
 
-const parseDataIntoXlsFormat = (data: HistoryItem[]) => {
+const parseDataIntoCsvFormat = (data: HistoryItem[]) => {
   const initialString = 'value 1,action,value 2,result,timestamp\n'
 
   const finalString = data.reduce((builtString, historyItem) => {
     const { value1, action, value2, result, timeStamp } = historyItem
 
-    const dataRow = `${value1},${action},${value2},${result},${JSON.stringify(timeStamp)}`
+    const dataRow = `${value1},${action},${value2},${result},${timeStamp.toString()}`
 
     return builtString + dataRow + '\n'
   }, initialString)
@@ -74,12 +79,92 @@ const parseDataIntoXlsFormat = (data: HistoryItem[]) => {
   return finalString
 }
 
-const onHistoryExport = () => {
-  const data = parseDataIntoXlsFormat(sortedItems.value)
+const readFileData = (e: Event) => {
+  const target = e.target as HTMLInputElement
 
-  saveToFile('test', data)
+  if (target?.files && target?.files?.[0]) {
+    const myFile = target?.files?.[0]
+    const reader = new FileReader()
+
+    reader.addEventListener('load', (e) => {
+      const arrayBuffer = e.target?.result as ArrayBuffer
+
+      // Convert the ArrayBuffer to a string
+      const decoder = new TextDecoder('utf-8')
+      const csvString = decoder.decode(arrayBuffer)
+
+      importData.value = csvString
+    })
+
+    reader.readAsArrayBuffer(myFile)
+  }
 }
-const onHistoryImport = () => {}
+
+const onHistoryExport = () => {
+  const data = parseDataIntoCsvFormat(sortedItems.value)
+
+  saveToFile('calculator_history', data)
+}
+const onHistoryImport = () => {
+  if (input.value) {
+    input.value.click()
+  }
+}
+
+const parseCsvStringToHistoryItems = (csvString: string) => {
+  if (!csvString) {
+    return []
+  }
+
+  const items: HistoryItem[] = csvString
+    .split('\n')
+    .map((historyItemString, index) => {
+      // The first item is the column names
+      if (index === 0) {
+        return
+      }
+
+      const [value1, action, value2, result, timeStamp] = historyItemString.split(',')
+
+      if (!value1 || !action || !value2 || !result || !timeStamp) {
+        return
+      }
+
+      const historyItem = {
+        value1,
+        action,
+        value2,
+        result,
+        timeStamp: new Date(timeStamp)
+      }
+
+      return historyItem
+    })
+    .filter(
+      (item) =>
+        !!item &&
+        !!item.value1 &&
+        !!item.value2 &&
+        !!item.action &&
+        !!item.result &&
+        !!item.timeStamp
+    ) as HistoryItem[]
+
+  return items
+}
+
+watch(importData, (data) => {
+  if (!!data) {
+    const importedHistoryItems = parseCsvStringToHistoryItems(data)
+
+    // Merge with current history items
+    const currentHistoryItems = [...history.value.items]
+    const combinedHistoryItems = [...currentHistoryItems, ...importedHistoryItems]
+    const sortedItems = [...combinedHistoryItems]
+
+    history.value.items = sortedItems
+  }
+})
 </script>
 
 <template>
@@ -94,8 +179,16 @@ const onHistoryImport = () => {}
     </Button>
   </div>
   <div v-if="isHistoryMode" class="history-actions">
-    <Button class="history-action">Import</Button>
+    <Button class="history-action" @click="onHistoryImport">Import</Button>
     <Button class="history-action" @click="onHistoryExport">Export</Button>
+    <input
+      ref="input"
+      tabindex="-1"
+      class="history-action--hidden"
+      type="file"
+      accept=".xls,.xlsx,.csv"
+      @change="readFileData($event)"
+    />
   </div>
   <Calculator />
 </template>
@@ -145,6 +238,16 @@ const onHistoryImport = () => {}
 
   .history-action {
     padding: 0.25rem 1rem;
+  }
+
+  .history-action--hidden {
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    height: 1px;
+    overflow: hidden;
+    position: absolute;
+    white-space: nowrap;
+    width: 1px;
   }
 }
 </style>
