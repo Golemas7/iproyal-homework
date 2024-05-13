@@ -7,20 +7,20 @@ import History from './History.vue'
 import Button from '../Button.vue'
 
 export type ResultAndAction = {
-  value: string
-  action: string
-  actionStarted: boolean
-  previousValue: string
-  fakeDecimal: boolean
+  value1: number
+  action: CalculatorActions | ''
+  value2: number
+  result: number | null
+  currentInputActive: 'value1' | 'value2'
   onButtonClick: (e: CalculatorButton) => void
 }
 
-export type CalculatorActions = 'C' | '^' | '%' | '/' | 'X' | '-' | '+' | '='
+export type CalculatorActions = 'C' | '^' | '↹' | '/' | 'X' | '-' | '+' | '='
 export type CalculatorNumbers = '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9'
 export type CalculatorButton = CalculatorActions | CalculatorNumbers | '.'
 
 const buttons: CalculatorButton[][] = [
-  ['C', '^', '%', '/'],
+  ['C', '^', '↹', '/'],
   ['7', '8', '9', 'X'],
   ['4', '5', '6', '-'],
   ['1', '2', '3', '+'],
@@ -32,11 +32,11 @@ const numberButtons = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
 
 // TODO CHECK IF WE CAN USE REACTIVE OR ONLY REF
 const calculation = ref<ResultAndAction>({
-  value: '0',
+  value1: 0,
   action: '',
-  actionStarted: false,
-  previousValue: '',
-  fakeDecimal: false,
+  value2: 0,
+  result: null,
+  currentInputActive: 'value1',
   onButtonClick: (e: CalculatorButton) => {}
 })
 const isHistoryMode = ref(false)
@@ -44,19 +44,19 @@ const isHistoryMode = ref(false)
 provide('resultAndAction', calculation)
 provide('isHistoryMode', isHistoryMode)
 
-const visibleValue = computed(() => {
-  const { value, fakeDecimal, previousValue } = calculation.value
+// const visibleValue = computed(() => {
+//   const { value, fakeDecimal, previousValue } = calculation.value
 
-  if (value === '') {
-    if (fakeDecimal) {
-      return '0'
-    }
+//   if (value === '') {
+//     if (fakeDecimal) {
+//       return '0'
+//     }
 
-    return previousValue
-  }
+//     return previousValue
+//   }
 
-  return value
-})
+//   return value
+// })
 
 const handleButtonClick = (e: CalculatorButton) => {
   calculation.value.onButtonClick(e)
@@ -80,15 +80,16 @@ const handleButtonClick = (e: CalculatorButton) => {
         <History />
 
         <template v-if="!isHistoryMode">
-          <div class="history">
+          <!-- <div class="history">
             <template v-if="calculation.previousValue">
               <span>{{ calculation.previousValue }}</span>
               <span>{{ ` ${calculation.action}` }}</span>
             </template>
-          </div>
+          </div> -->
 
-          <div class="current">
-            <span>{{ visibleValue }}{{ calculation.fakeDecimal ? '.' : '' }}</span>
+          <div v-if="calculation.result !== null" class="result">
+            <span class="result-symbol">=</span>
+            <span class="result-value">{{ calculation.result }}</span>
           </div>
         </template>
       </div>
@@ -172,6 +173,18 @@ const handleButtonClick = (e: CalculatorButton) => {
 .current {
   font-size: 1.875rem;
   color: white;
+}
+
+.result {
+  font-size: 1.875rem;
+
+  .result-symbol {
+    padding-right: 1rem;
+  }
+
+  .result-value {
+    color: white;
+  }
 }
 
 .buttons-container {

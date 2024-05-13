@@ -1,10 +1,14 @@
 <script setup lang="ts">
-import { onBeforeUnmount, onMounted, inject, type Ref } from 'vue'
-import type { CalculatorActions, CalculatorButton, ResultAndAction } from './ResultAndAction.vue'
+import { onBeforeUnmount, onMounted, inject, type Ref, watch, ref } from 'vue'
+import {
+  type CalculatorActions,
+  type CalculatorButton,
+  type ResultAndAction
+} from './ResultAndAction.vue'
 import type { History, HistoryItem } from './History.vue'
 import { parseNumberValueFromString } from './helpers'
 
-const calculatorRegExp = /^[Cc\^%/789Xx456\-123\+0.=]+$/
+// const calculatorRegExp = /^[Cc\^%/789Xx456\-123\+0.=]+$/
 
 // Inject the data for binding with result and action
 const { value: calculation } = inject<Ref<ResultAndAction>>(
@@ -13,179 +17,262 @@ const { value: calculation } = inject<Ref<ResultAndAction>>(
 
 // Inject the data for binding with history
 const { value: history } = inject<Ref<History>>('history') as Ref<History>
+const isHistoryMode = inject<Ref<Boolean>>('isHistoryMode') as Ref<Boolean>
+
+const input1 = ref<HTMLInputElement | null>(null)
+const input2 = ref<HTMLInputElement | null>(null)
 
 const handleCalculationAction = (
-  oldValue: number,
-  currentValue: number,
-  action: CalculatorActions
+  value1: number,
+  value2: number,
+  action: CalculatorActions | ''
 ): number | undefined => {
   switch (action) {
-    case 'C':
-      return undefined
     case '^':
-      return Math.pow(oldValue, currentValue)
-    case '%':
-      return 0 // TODO IMPLEMENT THIS
+      return Math.pow(value1, value2)
     case '/':
-      return oldValue / currentValue
+      return value1 / value2
     case 'X':
-      return oldValue * currentValue
+      return value1 * value2
     case '+':
-      return oldValue + currentValue
+      return value1 + value2
     case '-':
-      return oldValue - currentValue
-    case '=':
-      return oldValue
+      return value1 - value2
     default:
       return 0
   }
 }
 
-// TODO IF EQUAL IS PRESSED AND WE START TYPING, START A NEW CALCULATION
+const handleHistoryClick = (hisotryItem: HistoryItem) => {
+  const { value1, action, value2, result } = hisotryItem
 
-/**
- * We use strings to represent current and history values, which are parsed only when needed for calculations. This makes the process of adding numbers to the end and handling floating points a lot easier.
- */
-const handleCalculationValue = (value: string, digit: CalculatorButton) => {
-  let newValue = value
+  calculation.action = action as CalculatorActions
+  calculation.value1 = value1
+  calculation.value2 = value2
+  calculation.result = result
+}
 
-  // Check if it's a digit we are entering
-  const parsedDigit = parseNumberValueFromString(digit)
-  const isNumber = !isNaN(parsedDigit)
+// TODO HANDLE FLOAT VALUES
+const handleButtonClick = (buttonValue: CalculatorButton) => {
+  if (buttonValue !== '=' && calculation.result !== null) {
+    calculation.result = null
+  }
 
-  // We are entering digits
-  if (isNumber) {
-    // If we faked a float number visually, now we do it for real since it's a valid float number now
-    if (calculation.fakeDecimal) {
-      let nonEmptyValue = value || '0'
+  const isANumber = !isNaN(parseInt(buttonValue))
 
-      newValue = nonEmptyValue + '.' + digit
-      calculation.fakeDecimal = false
+  if (isANumber || buttonValue === '.') {
+    // Handle number inputs
+    const oldNumber = calculation[calculation.currentInputActive]
+    const newNumber = '' + oldNumber + buttonValue
+
+    calculation[calculation.currentInputActive] = parseFloat(newNumber)
+  } else if (buttonValue === '↹') {
+    // Handle switching the inputs
+    if (calculation.currentInputActive === 'value1') {
+      input2.value?.click()
+      input2.value?.focus()
     } else {
-      // If we are not faking floats, just add the digit to the end
-      newValue = value === '0' ? digit : value + digit
+      input1.value?.click()
+      input1.value?.focus()
     }
-  } else if (digit === '.') {
-    // We are making a float
+  } else if (buttonValue === '=') {
+    // Handle calculation
 
-    // If we don't have a float type yet and we are not faking it yet, fake it
-    if (!value.includes('.') && !calculation.fakeDecimal) {
-      calculation.fakeDecimal = true
-    }
-  } else {
-    // If it's an action
-
-    // If it's a clear action, reset everything
-    if (digit === 'C') {
-      calculation.action = ''
-      calculation.previousValue = ''
-      calculation.actionStarted = false
-      calculation.fakeDecimal = false
-      calculation.value = '0'
-
+    // We return if the action is missing
+    if (!calculation.action) {
       return
     }
 
-    // Reset the fake decimal
-    if (calculation.fakeDecimal) {
-      calculation.fakeDecimal = false
+    // Calculate the value
+    const newValue = handleCalculationAction(
+      calculation.value1,
+      calculation.value2,
+      calculation.action
+    )
+
+    // Set the result
+    calculation.result = newValue ?? null
+
+    // Create history entry
+
+    const newHistoryItem = {
+      value1: calculation.value1,
+      action: calculation.action as CalculatorActions,
+      value2: calculation.value2,
+      result: calculation.result ?? 0,
+      timeStamp: new Date()
     }
 
-    // If a previous action is pending and a value was provided
-    if (calculation.action && calculation.previousValue) {
-      // Resolve previous calculation
+    history.items.push(newHistoryItem)
+  } else if (buttonValue === 'C') {
+    // Handle clear
 
-      // If we have a value to resolve it to
-      if (calculation.value !== '') {
-        const parsedValue = parseNumberValueFromString(calculation.value)
-        const parsedPreviousValue = parseNumberValueFromString(calculation.previousValue)
+    calculation.value1 = 0
+    calculation.action = ''
+    calculation.value2 = 0
+    calculation.result = null
+    calculation.currentInputActive = 'value1'
 
-        // Calculate new value
-        const calculatedValue = handleCalculationAction(
-          parsedPreviousValue,
-          parsedValue,
-          calculation.action as CalculatorActions
-        )
+    input1.value?.focus()
+  } else {
+    // Handle Actions
+    calculation.action = buttonValue as CalculatorActions
 
-        const newHistoryItem = {
-          value1: calculation.previousValue,
-          action: calculation.action,
-          value2: calculation.value,
-          result: calculatedValue?.toString() || '',
-          timeStamp: new Date()
-        }
-
-        history.items.push(newHistoryItem)
-
-        calculation.previousValue = calculatedValue?.toString() || ''
-
-        // Set current value to empty string
-        newValue = ''
-      }
-
-      // Set the action
-      calculation.action = digit
-    } else {
-      // No previous action or no previous value
-
-      // Set the new action
-      calculation.action = digit
-      calculation.previousValue = value
-      newValue = ''
-    }
-
-    // Set state to active
-    calculation.actionStarted = true
-  }
-
-  calculation.value = newValue
-}
-
-const calculatorKeydown = (e: KeyboardEvent) => {
-  handleButtonInput(calculation.value, e.key.toUpperCase())
-}
-
-const handleButtonInput = (value: string, button: string) => {
-  if (
-    calculatorRegExp.test(button) ||
-    button === 'Backspace' ||
-    button === 'Delete' ||
-    button === '*'
-  ) {
-    if (button === 'Backspace' || button === 'Delete') {
-      // TODO IF THERE IS TIME ADD SUPPORT FOR DELETING DIGETS
-      handleCalculationValue(value, 'C')
-    } else if (button === '*') {
-      handleCalculationValue(value, 'X')
-    } else {
-      handleCalculationValue(value, button as CalculatorButton)
+    if (calculation.currentInputActive !== 'value2') {
+      calculation.currentInputActive = 'value2'
+      input2.value?.focus()
     }
   }
 }
 
-const handleButtonClick = (buttonValue: CalculatorButton) => {
-  handleButtonInput(calculation.value, buttonValue.toString())
+const onInputChange = (event: Event, valueName: 'value1' | 'value2') => {
+  const target = event.target as HTMLInputElement
+  const newValue = target.value
+
+  if (newValue === '') {
+    calculation[valueName] = 0
+  }
 }
 
-const handleHistoryClick = (hisotryItem: HistoryItem) => {
-  const { value1, action, value2 } = hisotryItem
+//  TODO HANDLE ACCESSIBILITY CASES
+const onInputBlur = (e: Event, valueName: 'value1' | 'value2') => {
+  // We set a timeout, so click will register first before we start processing if new input was clicked. We need this, because the blur event is fired first.
+  setTimeout(() => {
+    if (calculation.currentInputActive === valueName) {
+      const input = e.target as HTMLInputElement
 
-  calculation.action = action
-  calculation.previousValue = value1
-  calculation.actionStarted = true
-  calculation.fakeDecimal = false
-  calculation.value = value2
+      calculation.currentInputActive = valueName
+      input.focus()
+
+      // Browser limitation, sometimes we need to wait for blur to finish
+      setTimeout(() => {
+        input.focus()
+      }, 100)
+    }
+  }, 100)
+}
+
+const onFocusChanged = (valueName: 'value1' | 'value2') => {
+  console.log('click simulated')
+
+  calculation.currentInputActive = valueName
+}
+
+const onKeyboardInput = (e: KeyboardEvent) => {
+  const key = e.key.toUpperCase()
+  const validKeys = ['C', '^', '/', 'X', '-', '+', '=', 'TAB', '*', 'ENTER']
+
+  if (validKeys.includes(key)) {
+    let validKey = key
+
+    if (key === 'TAB') {
+      validKey = '↹'
+    } else if (key === '*') {
+      validKey = 'X'
+    } else if (key === 'ENTER') {
+      validKey = '='
+    }
+
+    handleButtonClick(validKey as CalculatorButton)
+  }
+}
+
+const onIputKeyDown = (e: KeyboardEvent) => {
+  if (isNaN(parseInt(e.key)) && e.key !== 'Backspace' && e.key !== 'Delete' && e.key !== '.') {
+    e.preventDefault()
+    e.stopPropagation()
+
+    onKeyboardInput(e)
+  } else if (calculation.result !== null && e.key !== '=') {
+    calculation.result = null
+  }
 }
 
 // Set the method references to apropriate methods
 calculation.onButtonClick = handleButtonClick
 history.setCurrentCalculationToEntry = handleHistoryClick
 
-onMounted(() => {
-  window.addEventListener('keydown', calculatorKeydown)
-})
-
-onBeforeUnmount(() => {
-  window.removeEventListener('keydown', calculatorKeydown)
+// TODO RETAIN FOCUS AFTER SWITCHING BETWEEN HISTORY/CALCULATOR
+watch(isHistoryMode.value, (value) => {
+  if (!value) {
+    input1.value?.focus()
+  }
 })
 </script>
+
+<!-- TODO HANDLE :style width with decimal numbers -->
+<template>
+  <div v-if="!isHistoryMode" class="calculator-calculations" @keydown="onKeyboardInput">
+    <input
+      ref="input1"
+      autofocus
+      :style="{ width: `${calculation.value1.toString().length * 1.2}ch` }"
+      type="number"
+      v-model="calculation.value1"
+      class="calculator-input"
+      @keydown="onIputKeyDown($event)"
+      @input="(e) => onInputChange(e, 'value1')"
+      @blur="(e) => onInputBlur(e, 'value1')"
+      @click="onFocusChanged('value1')"
+    />
+    <span class="calculator-action">{{ calculation.action.toLocaleLowerCase() || '+' }}</span>
+    <input
+      ref="input2"
+      :style="{ width: `${calculation.value2.toString().length * 1.2}ch` }"
+      type="number"
+      v-model="calculation.value2"
+      class="calculator-input"
+      @keydown="onIputKeyDown($event)"
+      @input="(e) => onInputChange(e, 'value2')"
+      @blur="(e) => onInputBlur(e, 'value2')"
+      @click="onFocusChanged('value2')"
+    />
+  </div>
+</template>
+
+<style scoped>
+.calculator-calculations {
+  font-size: 2.5rem;
+  display: flex;
+  width: 100%;
+  justify-content: flex-end;
+  line-height: 1;
+  color: #9e9c9c;
+}
+
+.calculator-action {
+  min-width: 40px;
+  color: inherit;
+  text-align: center;
+}
+
+.calculator-input {
+  background: transparent;
+  border: none;
+  width: min-content;
+  height: 3.125rem;
+  font-size: inherit;
+  flex-shrink: 1;
+  display: inline-block;
+  max-width: 140px;
+  width: 100%;
+  color: inherit;
+}
+
+.calculator-input:focus {
+  outline: none;
+}
+
+/* Remove arrows/spinners from input type number */
+/* Chrome, Safari, Edge, Opera */
+.calculator-input::-webkit-outer-spin-button,
+.calculator-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Firefox */
+.calculator-input[type='number'] {
+  -moz-appearance: textfield;
+}
+</style>

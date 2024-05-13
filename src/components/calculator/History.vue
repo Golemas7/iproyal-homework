@@ -6,10 +6,10 @@ import Button from '../Button.vue'
 import { parseCsvStringToHistoryItems, parseDataIntoCsvFormat } from './helpers'
 
 export type HistoryItem = {
-  value1: string
+  value1: number
   action: string
-  value2: string
-  result: string
+  value2: number
+  result: number
   timeStamp: Date
 }
 
@@ -120,7 +120,7 @@ const sortedItems = computed(() => {
   margin-bottom: 1.5rem;
   width: 100%;
   align-items: flex-end;
-  gap: 0.1rem;
+  gap: 0.2rem;
   height: 100%;
   overflow-y: hidden;
   justify-content: flex-end;
