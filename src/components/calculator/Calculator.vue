@@ -1,21 +1,8 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, inject, reactive, ref, watch, type Ref } from 'vue'
-import type { ResultAndAction } from './ResultAndAction.vue'
+import { onBeforeUnmount, onMounted, inject, type Ref } from 'vue'
+import type { CalculatorActions, CalculatorButton, ResultAndAction } from './ResultAndAction.vue'
 import type { History, HistoryItem } from './History.vue'
-
-type CalculatorActions = 'C' | '^' | '%' | '/' | 'X' | '-' | '+' | '='
-type CalculatorNumbers = '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9'
-type CalculatorButton = CalculatorActions | CalculatorNumbers | '.'
-
-const buttons: CalculatorButton[][] = [
-  ['C', '^', '%', '/'],
-  ['7', '8', '9', 'X'],
-  ['4', '5', '6', '-'],
-  ['1', '2', '3', '+'],
-  ['0', '.', '=']
-]
-
-const numberButtons = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
+import { parseNumberValueFromString } from './helpers'
 
 const calculatorRegExp = /^[Cc\^%/789Xx456\-123\+0.=]+$/
 
@@ -26,14 +13,6 @@ const { value: calculation } = inject<Ref<ResultAndAction>>(
 
 // Inject the data for binding with history
 const { value: history } = inject<Ref<History>>('history') as Ref<History>
-
-onMounted(() => {
-  window.addEventListener('keydown', calculatorKeydown)
-})
-
-onBeforeUnmount(() => {
-  window.removeEventListener('keydown', calculatorKeydown)
-})
 
 const handleCalculationAction = (
   oldValue: number,
@@ -62,10 +41,6 @@ const handleCalculationAction = (
   }
 }
 
-const parseValueFromString = (value: string): number => {
-  return value.includes('.') ? parseFloat(value) : parseInt(value)
-}
-
 // TODO IF EQUAL IS PRESSED AND WE START TYPING, START A NEW CALCULATION
 
 /**
@@ -75,7 +50,7 @@ const handleCalculationValue = (value: string, digit: CalculatorButton) => {
   let newValue = value
 
   // Check if it's a digit we are entering
-  const parsedDigit = parseValueFromString(digit)
+  const parsedDigit = parseNumberValueFromString(digit)
   const isNumber = !isNaN(parsedDigit)
 
   // We are entering digits
@@ -122,8 +97,8 @@ const handleCalculationValue = (value: string, digit: CalculatorButton) => {
 
       // If we have a value to resolve it to
       if (calculation.value !== '') {
-        const parsedValue = parseValueFromString(calculation.value)
-        const parsedPreviousValue = parseValueFromString(calculation.previousValue)
+        const parsedValue = parseNumberValueFromString(calculation.value)
+        const parsedPreviousValue = parseNumberValueFromString(calculation.previousValue)
 
         // Calculate new value
         const calculatedValue = handleCalculationAction(
@@ -192,8 +167,6 @@ const handleButtonClick = (buttonValue: CalculatorButton) => {
   handleButtonInput(calculation.value, buttonValue.toString())
 }
 
-calculation.onButtonClick = handleButtonClick
-
 const handleHistoryClick = (hisotryItem: HistoryItem) => {
   const { value1, action, value2 } = hisotryItem
 
@@ -204,5 +177,15 @@ const handleHistoryClick = (hisotryItem: HistoryItem) => {
   calculation.value = value2
 }
 
+// Set the method references to apropriate methods
+calculation.onButtonClick = handleButtonClick
 history.setCurrentCalculationToEntry = handleHistoryClick
+
+onMounted(() => {
+  window.addEventListener('keydown', calculatorKeydown)
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('keydown', calculatorKeydown)
+})
 </script>

@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { computed, inject, onBeforeUnmount, onMounted, provide, ref, watch, type Ref } from 'vue'
+import { saveToFile, readFileData } from '@/utils/file'
 import Calculator from './Calculator.vue'
 import Button from '../Button.vue'
+import { parseCsvStringToHistoryItems, parseDataIntoCsvFormat } from './helpers'
 
 export type HistoryItem = {
   value1: string
@@ -18,7 +20,6 @@ export type History = {
 
 const input = ref<HTMLInputElement | null>(null)
 const importData = ref<string>('')
-
 const history = ref<History>({
   items: [],
   setCurrentCalculationToEntry: (e: HistoryItem) => {}
@@ -28,136 +29,31 @@ provide('history', history)
 
 const isHistoryMode = inject<Ref<Boolean>>('isHistoryMode') as Ref<Boolean>
 
-const handleButtonClick = (historyItem: HistoryItem) => {
-  history.value.setCurrentCalculationToEntry(historyItem)
-  isHistoryMode.value = false
-}
-
-const sortedItems = computed(() => {
-  const unsortedItems = [...history.value.items]
-
-  let sortedItemsArray = unsortedItems
-
-  sortedItemsArray = unsortedItems.sort((a, b) => b.timeStamp - a.timeStamp)
-
-  if (!isHistoryMode.value) {
-    sortedItemsArray = sortedItemsArray.reverse()
-  }
-  return [...sortedItemsArray]
-})
-
-// Partial code from https://stackoverflow.com/a/68146412
-// Added in revodeObjectURL as pointed in the comments
-const saveToFile = (filename: string, data: string) => {
-  const blob = new Blob([data], { type: 'text/csv' })
-
-  if (window.navigator.msSaveOrOpenBlob) {
-    window.navigator.msSaveBlob(blob, filename)
-  } else {
-    const elem = window.document.createElement('a')
-    const href = window.URL.createObjectURL(blob)
-
-    elem.href = href
-    elem.download = filename
-    document.body.appendChild(elem)
-    elem.click()
-    document.body.removeChild(elem)
-    URL.revokeObjectURL(href)
-  }
-}
-
-const parseDataIntoCsvFormat = (data: HistoryItem[]) => {
-  const initialString = 'value 1,action,value 2,result,timestamp\n'
-
-  const finalString = data.reduce((builtString, historyItem) => {
-    const { value1, action, value2, result, timeStamp } = historyItem
-
-    const dataRow = `${value1},${action},${value2},${result},${timeStamp.toString()}`
-
-    return builtString + dataRow + '\n'
-  }, initialString)
-
-  return finalString
-}
-
-// Partial code from https://stackoverflow.com/a/50578313
-// Since readAsBinaryString is deprecated in favor of readAsArrayBuffer, we use readAsArrayBuffer instead
-const readFileData = (e: Event) => {
-  const target = e.target as HTMLInputElement
-
-  if (target?.files && target?.files?.[0]) {
-    const myFile = target?.files?.[0]
-    const reader = new FileReader()
-
-    reader.addEventListener('load', (e) => {
-      const arrayBuffer = e.target?.result as ArrayBuffer
-
-      // Convert the ArrayBuffer to a string
-      const decoder = new TextDecoder('utf-8')
-      const csvString = decoder.decode(arrayBuffer)
-
-      importData.value = csvString
-    })
-
-    reader.readAsArrayBuffer(myFile)
-  }
-}
-
 const onHistoryExport = () => {
-  const data = parseDataIntoCsvFormat(sortedItems.value)
+  const headerRowString = 'value 1,action,value 2,result,timestamp\n'
+
+  const data = parseDataIntoCsvFormat(sortedItems.value, headerRowString)
 
   saveToFile('calculator_history', data)
 }
+
 const onHistoryImport = () => {
   if (input.value) {
     input.value.click()
   }
 }
 
-const parseCsvStringToHistoryItems = (csvString: string) => {
-  if (!csvString) {
-    return []
-  }
-
-  const items: HistoryItem[] = csvString
-    .split('\n')
-    .map((historyItemString, index) => {
-      // The first item is the column names
-      if (index === 0) {
-        return
-      }
-
-      const [value1, action, value2, result, timeStamp] = historyItemString.split(',')
-
-      if (!value1 || !action || !value2 || !result || !timeStamp) {
-        return
-      }
-
-      const historyItem = {
-        value1,
-        action,
-        value2,
-        result,
-        timeStamp: new Date(timeStamp)
-      }
-
-      return historyItem
-    })
-    .filter(
-      (item) =>
-        !!item &&
-        !!item.value1 &&
-        !!item.value2 &&
-        !!item.action &&
-        !!item.result &&
-        !!item.timeStamp
-    ) as HistoryItem[]
-
-  return items
-}
-
 const onHistoryClear = () => {
   history.value.items = []
+}
+
+const onFileAttached = (e: Event) => {
+  readFileData(e, importData)
+}
+
+const handleButtonClick = (historyItem: HistoryItem) => {
+  history.value.setCurrentCalculationToEntry(historyItem)
+  isHistoryMode.value = false
 }
 
 watch(importData, (data) => {
@@ -171,6 +67,19 @@ watch(importData, (data) => {
 
     history.value.items = sortedItems
   }
+})
+
+const sortedItems = computed(() => {
+  const unsortedItems = [...history.value.items]
+
+  let sortedItemsArray = unsortedItems
+
+  sortedItemsArray = unsortedItems.sort((a, b) => +b.timeStamp - +a.timeStamp)
+
+  if (!isHistoryMode.value) {
+    sortedItemsArray = sortedItemsArray.reverse()
+  }
+  return [...sortedItemsArray]
 })
 </script>
 
@@ -197,7 +106,7 @@ watch(importData, (data) => {
       class="history-action--hidden"
       type="file"
       accept=".xls,.xlsx,.csv"
-      @change="readFileData($event)"
+      @change="onFileAttached($event)"
     />
     <Button type="Secondary" class="history-action" @click="onHistoryClear">Clear</Button>
   </div>

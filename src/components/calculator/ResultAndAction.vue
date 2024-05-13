@@ -15,9 +15,9 @@ export type ResultAndAction = {
   onButtonClick: (e: CalculatorButton) => void
 }
 
-type CalculatorActions = 'C' | '^' | '%' | '/' | 'X' | '-' | '+' | '='
-type CalculatorNumbers = '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9'
-type CalculatorButton = CalculatorActions | CalculatorNumbers | '.'
+export type CalculatorActions = 'C' | '^' | '%' | '/' | 'X' | '-' | '+' | '='
+export type CalculatorNumbers = '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9'
+export type CalculatorButton = CalculatorActions | CalculatorNumbers | '.'
 
 const buttons: CalculatorButton[][] = [
   ['C', '^', '%', '/'],
@@ -27,6 +27,7 @@ const buttons: CalculatorButton[][] = [
   ['0', '.', '=']
 ]
 
+// Could just do a check of !isNaN(parseInt(value)) instead
 const numberButtons = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
 
 // TODO CHECK IF WE CAN USE REACTIVE OR ONLY REF
@@ -112,9 +113,6 @@ const handleButtonClick = (e: CalculatorButton) => {
 </template>
 
 <style scoped>
-.calculator {
-}
-
 .calculator-inner-container {
   width: 450px;
   height: 950px;
@@ -198,18 +196,4 @@ const handleButtonClick = (e: CalculatorButton) => {
   height: 150px;
   border-radius: 42.5px;
 }
-
-/* .calculator-button:not(.number-button) {
-  background-color: #5a5757;
-  box-shadow: 5px 5px 40px 0px rgba(11, 11, 11, 0.3);
-}
-.number-button {
-  background-color: #3f3f3f;
-  box-shadow: 4px 3px 20px 0px rgba(0, 0, 0, 0.5);
-  box-shadow: -4px -2px 20px 0px rgba(195, 193, 191, 0.2);
-}
-
-button {
-  cursor: pointer;
-} */
 </style>
