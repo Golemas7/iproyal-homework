@@ -1,11 +1,20 @@
 // Partial code from https://stackoverflow.com/a/68146412
+
+import type { Ref } from 'vue'
+
 // Added in revodeObjectURL as pointed in the comments
 export const saveToFile = (filename: string, data: string) => {
   const blob = new Blob([data], { type: 'text/csv' })
 
-  if (window.navigator.msSaveOrOpenBlob) {
-    window.navigator.msSaveBlob(blob, filename)
+  type UniversalNavigator = Navigator & { msSaveOrOpenBlob: unknown; msSaveBlob: any }
+
+  const navigator = window.navigator as UniversalNavigator
+
+  if (navigator.msSaveOrOpenBlob) {
+    // for IE
+    navigator.msSaveBlob(blob, filename)
   } else {
+    // for Non-IE (chrome, firefox etc.)
     const elem = window.document.createElement('a')
     const href = window.URL.createObjectURL(blob)
 
