@@ -44,20 +44,6 @@ const isHistoryMode = ref(false)
 provide('resultAndAction', calculation)
 provide('isHistoryMode', isHistoryMode)
 
-// const visibleValue = computed(() => {
-//   const { value, fakeDecimal, previousValue } = calculation.value
-
-//   if (value === '') {
-//     if (fakeDecimal) {
-//       return '0'
-//     }
-
-//     return previousValue
-//   }
-
-//   return value
-// })
-
 const handleButtonClick = (e: CalculatorButton) => {
   calculation.value.onButtonClick(e)
 }
@@ -80,13 +66,6 @@ const handleButtonClick = (e: CalculatorButton) => {
         <History />
 
         <template v-if="!isHistoryMode">
-          <!-- <div class="history">
-            <template v-if="calculation.previousValue">
-              <span>{{ calculation.previousValue }}</span>
-              <span>{{ ` ${calculation.action}` }}</span>
-            </template>
-          </div> -->
-
           <div v-if="calculation.result !== null" class="result">
             <span class="result-symbol">=</span>
             <span class="result-value">{{ calculation.result }}</span>
@@ -160,19 +139,6 @@ const handleButtonClick = (e: CalculatorButton) => {
   height: 700px;
   position: relative;
   overflow: visible;
-}
-
-.history {
-  font-size: 2.5rem;
-  color: #9e9c9c;
-  min-height: 6rem;
-  display: flex;
-  align-items: flex-end;
-}
-
-.current {
-  font-size: 1.875rem;
-  color: white;
 }
 
 .result {

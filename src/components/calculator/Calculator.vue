@@ -1,14 +1,11 @@
 <script setup lang="ts">
-import { onBeforeUnmount, onMounted, inject, type Ref, watch, ref } from 'vue'
+import { inject, type Ref, watch, ref } from 'vue'
 import {
   type CalculatorActions,
   type CalculatorButton,
   type ResultAndAction
 } from './ResultAndAction.vue'
 import type { History, HistoryItem } from './History.vue'
-import { parseNumberValueFromString } from './helpers'
-
-// const calculatorRegExp = /^[Cc\^%/789Xx456\-123\+0.=]+$/
 
 // Inject the data for binding with result and action
 const { value: calculation } = inject<Ref<ResultAndAction>>(
@@ -199,6 +196,8 @@ watch(isHistoryMode.value, (value) => {
   }
 })
 </script>
+
+<!-- TODO THINK ABOUT REUSING THE CALCULATION VALUE -->
 
 <!-- TODO HANDLE :style width with decimal numbers -->
 <template>
