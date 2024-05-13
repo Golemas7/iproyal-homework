@@ -2,7 +2,6 @@
 import { computed, inject, onBeforeUnmount, onMounted, provide, ref, watch, type Ref } from 'vue'
 import Calculator from './Calculator.vue'
 import Button from '../Button.vue'
-import { it } from 'node:test'
 
 export type HistoryItem = {
   value1: string
@@ -47,6 +46,8 @@ const sortedItems = computed(() => {
   return [...sortedItemsArray]
 })
 
+// Partial code from https://stackoverflow.com/a/68146412
+// Added in revodeObjectURL as pointed in the comments
 const saveToFile = (filename: string, data: string) => {
   const blob = new Blob([data], { type: 'text/csv' })
 
@@ -79,6 +80,8 @@ const parseDataIntoCsvFormat = (data: HistoryItem[]) => {
   return finalString
 }
 
+// Partial code from https://stackoverflow.com/a/50578313
+// Since readAsBinaryString is deprecated in favor of readAsArrayBuffer, we use readAsArrayBuffer instead
 const readFileData = (e: Event) => {
   const target = e.target as HTMLInputElement
 
@@ -248,6 +251,7 @@ watch(importData, (data) => {
     padding: 0.75rem 1rem;
   }
 
+  /* As per https://www.a11yproject.com/posts/how-to-hide-content/ */
   .history-action--hidden {
     clip: rect(0 0 0 0);
     clip-path: inset(50%);

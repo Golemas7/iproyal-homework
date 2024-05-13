@@ -1,1 +1,1 @@
-export { default as Calculator } from './Controls.vue'
+export { default as Calculator } from './ResultAndAction.vue'
