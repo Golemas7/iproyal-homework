@@ -16,13 +16,15 @@ export type HistoryItem = {
 export type History = {
   items: HistoryItem[]
   setCurrentCalculationToEntry: (entry: HistoryItem) => void
+  setCurrentCalculationToResult: (entry: HistoryItem) => void
 }
 
 const input = ref<HTMLInputElement | null>(null)
 const importData = ref<string>('')
 const history = ref<History>({
   items: [],
-  setCurrentCalculationToEntry: (e: HistoryItem) => {}
+  setCurrentCalculationToEntry: (e: HistoryItem) => {},
+  setCurrentCalculationToResult: (e: HistoryItem) => {}
 })
 
 provide('history', history)
@@ -51,8 +53,13 @@ const onFileAttached = (e: Event) => {
   readFileData(e, importData)
 }
 
-const handleButtonClick = (historyItem: HistoryItem) => {
-  history.value.setCurrentCalculationToEntry(historyItem)
+const handleButtonClick = (historyItem: HistoryItem, isResult?: boolean) => {
+  if (isResult) {
+    history.value.setCurrentCalculationToResult(historyItem)
+  } else {
+    history.value.setCurrentCalculationToEntry(historyItem)
+  }
+
   isHistoryMode.value = false
 }
 
@@ -86,14 +93,18 @@ const sortedItems = computed(() => {
 <template>
   <div class="history" :class="{ 'history--history-mode': isHistoryMode }">
     <template v-if="sortedItems?.length > 0">
-      <Button
-        v-for="historyItem in sortedItems"
-        as-icon
-        class="history-entry"
-        @click="handleButtonClick(historyItem)"
-      >
-        {{ `${historyItem.value1} ${historyItem.action} ${historyItem.value2}` }}
-      </Button>
+      <div v-for="historyItem in sortedItems" class="history-entry-container">
+        <Button
+          as-icon
+          class="history-entry history-entry--calculation"
+          @click="handleButtonClick(historyItem)"
+        >
+          {{ `${historyItem.value1} ${historyItem.action} ${historyItem.value2}` }}
+        </Button>
+        <Button as-icon class="history-entry" @click="handleButtonClick(historyItem, true)">
+          {{ `=  ${historyItem.result}` }}
+        </Button>
+      </div>
     </template>
     <span v-else-if="isHistoryMode">No history found</span>
   </div>
@@ -129,12 +140,22 @@ const sortedItems = computed(() => {
 .history--history-mode {
   overflow-y: auto;
   padding-right: 0.25rem;
-  gap: 0.5rem;
+  gap: 1.5rem;
   justify-content: flex-start;
 
   .history-entry {
     color: white;
   }
+
+  .history-entry--calculation {
+    font-size: 1.5rem;
+  }
+}
+
+.history-entry-container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
 }
 
 .history-entry {

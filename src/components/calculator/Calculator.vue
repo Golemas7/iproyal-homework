@@ -51,24 +51,46 @@ const calculateResult = (
   }
 }
 
-const handleHistoryClick = (hisotryItem: HistoryItem) => {
-  const { value1, action, value2, result } = hisotryItem
+const handleHistoryClick = (historyItem: HistoryItem, handleResultClick?: boolean) => {
+  const { value1, action, value2, result } = historyItem
 
-  resultAndAction.action = action as CalculatorActions
-  inputData.value1 = value1
-  inputData.value2 = value2
-  resultAndAction.result = result
+  if (handleResultClick) {
+    resultAndAction.action = ''
+    inputData.value1 = result || 0
+    inputData.value2 = 0
+    resultAndAction.result = null
+  } else {
+    resultAndAction.action = action as CalculatorActions
+    inputData.value1 = value1
+    inputData.value2 = value2
+    resultAndAction.result = null
+  }
 
   inputData.currentInputActive = 'value2'
   input2.value?.focus()
 }
 
-// TODO HANDLE FLOAT VALUES
-const handleButtonClick = (buttonValue: CalculatorButton) => {
-  // Clear the result if a previous calculation has just finished and we start typing
+const handleHistoryEntryClick = (historyItem: HistoryItem) => {
+  handleHistoryClick(historyItem)
+}
+
+const handleHistoryResultClick = (historyItem: HistoryItem) => {
+  handleHistoryClick(historyItem, true)
+}
+
+// Clear the result if a previous calculation has just finished and we start typing
+// Start a new calculcation with the result as a starting point
+const restartCalculationWithResultValue = (buttonValue: CalculatorButton) => {
   if (buttonValue !== '=' && resultAndAction.result !== null) {
+    inputData.value1 = resultAndAction.result
+    inputData.value2 = 0
     resultAndAction.result = null
   }
+}
+
+// TODO HANDLE FLOAT VALUES
+const handleButtonClick = (buttonValue: CalculatorButton) => {
+  restartCalculationWithResultValue(buttonValue)
 
   const isANumber = !isNaN(parseInt(buttonValue))
 
@@ -185,19 +207,28 @@ const onKeyboardInput = (e: KeyboardEvent) => {
 }
 
 const onIputKeyDown = (e: KeyboardEvent) => {
-  if (isNaN(parseInt(e.key)) && e.key !== 'Backspace' && e.key !== 'Delete' && e.key !== '.') {
+  const isANumber = !isNaN(parseInt(e.key))
+
+  if (!isANumber && e.key !== 'Backspace' && e.key !== 'Delete' && e.key !== '.') {
     e.preventDefault()
     e.stopPropagation()
 
     onKeyboardInput(e)
   } else if (resultAndAction.result !== null && e.key !== '=') {
+    if (isANumber) {
+      restartCalculationWithResultValue(e.key as CalculatorButton)
+    } else {
+      restartCalculationWithResultValue('0')
+    }
+
     resultAndAction.result = null
   }
 }
 
 // Set the method references to apropriate methods
 resultAndAction.onButtonClick = handleButtonClick
-history.setCurrentCalculationToEntry = handleHistoryClick
+history.setCurrentCalculationToEntry = handleHistoryEntryClick
+history.setCurrentCalculationToResult = handleHistoryResultClick
 
 watch(isHistoryMode, (value) => {
   if (!value) {
@@ -206,6 +237,7 @@ watch(isHistoryMode, (value) => {
       inputData.currentInputActive = 'value2'
       input2.value?.focus()
 
+      // Browser limitation, sometimes we need to wait for blur to finish
       setTimeout(() => {
         input2.value?.focus()
       }, 100)
@@ -214,6 +246,7 @@ watch(isHistoryMode, (value) => {
       inputData.currentInputActive = 'value1'
       input1.value?.focus()
 
+      // Browser limitation, sometimes we need to wait for blur to finish
       setTimeout(() => {
         input1.value?.focus()
       }, 100)
