@@ -7,8 +7,22 @@ import {
 } from './ResultAndAction.vue'
 import type { History, HistoryItem } from './History.vue'
 
+type InputData = {
+  value1: number
+  value2: number
+  currentInputActive: 'value1' | 'value2'
+}
+
+const { value: inputData } = ref<InputData>({
+  value1: 0,
+  value2: 0,
+  currentInputActive: 'value1'
+})
+const input1 = ref<HTMLInputElement | null>(null)
+const input2 = ref<HTMLInputElement | null>(null)
+
 // Inject the data for binding with result and action
-const { value: calculation } = inject<Ref<ResultAndAction>>(
+const { value: resultAndAction } = inject<Ref<ResultAndAction>>(
   'resultAndAction'
 ) as Ref<ResultAndAction>
 
@@ -16,10 +30,7 @@ const { value: calculation } = inject<Ref<ResultAndAction>>(
 const { value: history } = inject<Ref<History>>('history') as Ref<History>
 const isHistoryMode = inject<Ref<Boolean>>('isHistoryMode') as Ref<Boolean>
 
-const input1 = ref<HTMLInputElement | null>(null)
-const input2 = ref<HTMLInputElement | null>(null)
-
-const handleCalculationAction = (
+const calculateResult = (
   value1: number,
   value2: number,
   action: CalculatorActions | ''
@@ -43,29 +54,33 @@ const handleCalculationAction = (
 const handleHistoryClick = (hisotryItem: HistoryItem) => {
   const { value1, action, value2, result } = hisotryItem
 
-  calculation.action = action as CalculatorActions
-  calculation.value1 = value1
-  calculation.value2 = value2
-  calculation.result = result
+  resultAndAction.action = action as CalculatorActions
+  inputData.value1 = value1
+  inputData.value2 = value2
+  resultAndAction.result = result
+
+  inputData.currentInputActive = 'value2'
+  input2.value?.focus()
 }
 
 // TODO HANDLE FLOAT VALUES
 const handleButtonClick = (buttonValue: CalculatorButton) => {
-  if (buttonValue !== '=' && calculation.result !== null) {
-    calculation.result = null
+  // Clear the result if a previous calculation has just finished and we start typing
+  if (buttonValue !== '=' && resultAndAction.result !== null) {
+    resultAndAction.result = null
   }
 
   const isANumber = !isNaN(parseInt(buttonValue))
 
   if (isANumber || buttonValue === '.') {
     // Handle number inputs
-    const oldNumber = calculation[calculation.currentInputActive]
+    const oldNumber = inputData[inputData.currentInputActive]
     const newNumber = '' + oldNumber + buttonValue
 
-    calculation[calculation.currentInputActive] = parseFloat(newNumber)
+    inputData[inputData.currentInputActive] = parseFloat(newNumber)
   } else if (buttonValue === '↹') {
     // Handle switching the inputs
-    if (calculation.currentInputActive === 'value1') {
+    if (inputData.currentInputActive === 'value1') {
       input2.value?.click()
       input2.value?.focus()
     } else {
@@ -76,47 +91,44 @@ const handleButtonClick = (buttonValue: CalculatorButton) => {
     // Handle calculation
 
     // We return if the action is missing
-    if (!calculation.action) {
+    if (!resultAndAction.action) {
       return
     }
 
     // Calculate the value
-    const newValue = handleCalculationAction(
-      calculation.value1,
-      calculation.value2,
-      calculation.action
-    )
+    const newValue = calculateResult(inputData.value1, inputData.value2, resultAndAction.action)
 
     // Set the result
-    calculation.result = newValue ?? null
+    resultAndAction.result = newValue ?? null
 
     // Create history entry
 
     const newHistoryItem = {
-      value1: calculation.value1,
-      action: calculation.action as CalculatorActions,
-      value2: calculation.value2,
-      result: calculation.result ?? 0,
+      value1: inputData.value1,
+      action: resultAndAction.action as CalculatorActions,
+      value2: inputData.value2,
+      result: resultAndAction.result ?? 0,
       timeStamp: new Date()
     }
 
+    // Add to history
     history.items.push(newHistoryItem)
   } else if (buttonValue === 'C') {
     // Handle clear
 
-    calculation.value1 = 0
-    calculation.action = ''
-    calculation.value2 = 0
-    calculation.result = null
-    calculation.currentInputActive = 'value1'
+    inputData.value1 = 0
+    resultAndAction.action = ''
+    inputData.value2 = 0
+    resultAndAction.result = null
+    inputData.currentInputActive = 'value1'
 
     input1.value?.focus()
   } else {
     // Handle Actions
-    calculation.action = buttonValue as CalculatorActions
+    resultAndAction.action = buttonValue as CalculatorActions
 
-    if (calculation.currentInputActive !== 'value2') {
-      calculation.currentInputActive = 'value2'
+    if (inputData.currentInputActive !== 'value2') {
+      inputData.currentInputActive = 'value2'
       input2.value?.focus()
     }
   }
@@ -127,7 +139,7 @@ const onInputChange = (event: Event, valueName: 'value1' | 'value2') => {
   const newValue = target.value
 
   if (newValue === '') {
-    calculation[valueName] = 0
+    inputData[valueName] = 0
   }
 }
 
@@ -135,10 +147,10 @@ const onInputChange = (event: Event, valueName: 'value1' | 'value2') => {
 const onInputBlur = (e: Event, valueName: 'value1' | 'value2') => {
   // We set a timeout, so click will register first before we start processing if new input was clicked. We need this, because the blur event is fired first.
   setTimeout(() => {
-    if (calculation.currentInputActive === valueName) {
+    if (inputData.currentInputActive === valueName) {
       const input = e.target as HTMLInputElement
 
-      calculation.currentInputActive = valueName
+      inputData.currentInputActive = valueName
       input.focus()
 
       // Browser limitation, sometimes we need to wait for blur to finish
@@ -150,9 +162,7 @@ const onInputBlur = (e: Event, valueName: 'value1' | 'value2') => {
 }
 
 const onFocusChanged = (valueName: 'value1' | 'value2') => {
-  console.log('click simulated')
-
-  calculation.currentInputActive = valueName
+  inputData.currentInputActive = valueName
 }
 
 const onKeyboardInput = (e: KeyboardEvent) => {
@@ -180,19 +190,34 @@ const onIputKeyDown = (e: KeyboardEvent) => {
     e.stopPropagation()
 
     onKeyboardInput(e)
-  } else if (calculation.result !== null && e.key !== '=') {
-    calculation.result = null
+  } else if (resultAndAction.result !== null && e.key !== '=') {
+    resultAndAction.result = null
   }
 }
 
 // Set the method references to apropriate methods
-calculation.onButtonClick = handleButtonClick
+resultAndAction.onButtonClick = handleButtonClick
 history.setCurrentCalculationToEntry = handleHistoryClick
 
-// TODO RETAIN FOCUS AFTER SWITCHING BETWEEN HISTORY/CALCULATOR
-watch(isHistoryMode.value, (value) => {
+watch(isHistoryMode, (value) => {
   if (!value) {
-    input1.value?.focus()
+    if (resultAndAction.action) {
+      // Focus the second
+      inputData.currentInputActive = 'value2'
+      input2.value?.focus()
+
+      setTimeout(() => {
+        input2.value?.focus()
+      }, 100)
+    } else {
+      // Focus the first
+      inputData.currentInputActive = 'value1'
+      input1.value?.focus()
+
+      setTimeout(() => {
+        input1.value?.focus()
+      }, 100)
+    }
   }
 })
 </script>
@@ -205,21 +230,21 @@ watch(isHistoryMode.value, (value) => {
     <input
       ref="input1"
       autofocus
-      :style="{ width: `${calculation.value1.toString().length * 1.2}ch` }"
+      :style="{ width: `${inputData.value1.toString().length * 1.2}ch` }"
       type="number"
-      v-model="calculation.value1"
+      v-model="inputData.value1"
       class="calculator-input"
       @keydown="onIputKeyDown($event)"
       @input="(e) => onInputChange(e, 'value1')"
       @blur="(e) => onInputBlur(e, 'value1')"
       @click="onFocusChanged('value1')"
     />
-    <span class="calculator-action">{{ calculation.action.toLocaleLowerCase() || '+' }}</span>
+    <span class="calculator-action">{{ resultAndAction.action.toLocaleLowerCase() || '+' }}</span>
     <input
       ref="input2"
-      :style="{ width: `${calculation.value2.toString().length * 1.2}ch` }"
+      :style="{ width: `${inputData.value2.toString().length * 1.2}ch` }"
       type="number"
-      v-model="calculation.value2"
+      v-model="inputData.value2"
       class="calculator-input"
       @keydown="onIputKeyDown($event)"
       @input="(e) => onInputChange(e, 'value2')"

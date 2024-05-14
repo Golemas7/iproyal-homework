@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, provide, ref } from 'vue'
+import { provide, ref } from 'vue'
 
 // TODO HANDLE ABSOLUTE PATHS
 
@@ -7,11 +7,8 @@ import History from './History.vue'
 import Button from '../Button.vue'
 
 export type ResultAndAction = {
-  value1: number
   action: CalculatorActions | ''
-  value2: number
   result: number | null
-  currentInputActive: 'value1' | 'value2'
   onButtonClick: (e: CalculatorButton) => void
 }
 
@@ -31,21 +28,18 @@ const buttons: CalculatorButton[][] = [
 const numberButtons = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
 
 // TODO CHECK IF WE CAN USE REACTIVE OR ONLY REF
-const calculation = ref<ResultAndAction>({
-  value1: 0,
+const resultAndAction = ref<ResultAndAction>({
   action: '',
-  value2: 0,
   result: null,
-  currentInputActive: 'value1',
   onButtonClick: (e: CalculatorButton) => {}
 })
 const isHistoryMode = ref(false)
 
-provide('resultAndAction', calculation)
+provide('resultAndAction', resultAndAction)
 provide('isHistoryMode', isHistoryMode)
 
 const handleButtonClick = (e: CalculatorButton) => {
-  calculation.value.onButtonClick(e)
+  resultAndAction.value.onButtonClick(e)
 }
 </script>
 
@@ -66,9 +60,9 @@ const handleButtonClick = (e: CalculatorButton) => {
         <History />
 
         <template v-if="!isHistoryMode">
-          <div v-if="calculation.result !== null" class="result">
+          <div v-if="resultAndAction.result !== null" class="result">
             <span class="result-symbol">=</span>
-            <span class="result-value">{{ calculation.result }}</span>
+            <span class="result-value">{{ resultAndAction.result }}</span>
           </div>
         </template>
       </div>
