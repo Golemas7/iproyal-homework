@@ -165,7 +165,8 @@ const onInputChange = (event: Event, valueName: 'value1' | 'value2') => {
   }
 }
 
-//  TODO HANDLE ACCESSIBILITY CASES
+// TODO HANDLE ACCESSIBILITY CASES
+// Instead of holding the users focus, we could just use the active variable to add to value
 const onInputBlur = (e: Event, valueName: 'value1' | 'value2') => {
   // We set a timeout, so click will register first before we start processing if new input was clicked. We need this, because the blur event is fired first.
   setTimeout(() => {

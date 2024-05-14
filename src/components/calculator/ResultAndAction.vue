@@ -36,7 +36,6 @@ const buttonsMobile: CalculatorButton[][] = [
 // Could just do a check of !isNaN(parseInt(value)) instead
 const numberButtons = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
 
-// TODO CHECK IF WE CAN USE REACTIVE OR ONLY REF
 const resultAndAction = ref<ResultAndAction>({
   action: '',
   result: null,
