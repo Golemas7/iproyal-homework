@@ -3,5 +3,7 @@ import { Calculator } from '@/components/calculator'
 </script>
 
 <template>
-  <Calculator />
+  <main>
+    <Calculator />
+  </main>
 </template>
