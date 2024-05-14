@@ -24,6 +24,16 @@ const buttons: CalculatorButton[][] = [
   ['0', '.', '=']
 ]
 
+const buttonsMobile: CalculatorButton[][] = [
+  ['C', '^', '/'],
+  ['X', '-', '+'],
+  ['7', '8', '9'],
+  ['4', '5', '6'],
+  ['1', '2', '3'],
+  ['0', '.', '↹'],
+  ['=']
+]
+
 // Could just do a check of !isNaN(parseInt(value)) instead
 const numberButtons = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
 
@@ -88,17 +98,20 @@ const handleButtonClick = (e: CalculatorButton) => {
 
 <style scoped>
 .calculator-inner-container {
-  width: 450px;
-  height: 950px;
+  --max-calculator-width: 28.125rem;
+
+  width: 100%;
+  max-width: var(--max-calculator-width);
+  height: 59.375rem;
   background-color: #414141;
   border-radius: 40px;
-  padding: 60px 35px;
+  padding: 30px 20px;
 }
 
 .title {
   font-size: 1rem;
-  padding-bottom: 0.25rem;
   color: white;
+  padding-bottom: 0.25rem;
 }
 
 .title--active {
@@ -109,17 +122,17 @@ const handleButtonClick = (e: CalculatorButton) => {
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 2.5rem;
+  margin-bottom: 1.5rem;
   color: white;
   gap: 2rem;
 }
 
 .screen {
   background-color: #0b0b0b1a;
-  height: 300px;
-  width: 380px;
+  height: 18.75rem;
+  width: 100%;
   padding: 30px;
-  border-radius: 20px;
+  border-radius: 1.25rem;
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
@@ -127,6 +140,27 @@ const handleButtonClick = (e: CalculatorButton) => {
   margin-bottom: 60px;
   box-shadow: 5px 5px 60px 0px rgba(11, 11, 11, 0.1);
   overflow: hidden;
+}
+
+@media screen and (min-width: 768px) {
+  .calculator-inner-container {
+    width: var(--max-calculator-width);
+    height: 59.375rem;
+    border-radius: 2.5rem;
+    padding: 60px 35px;
+  }
+
+  .calculator-header {
+    margin-bottom: 2.5rem;
+  }
+
+  .screen {
+    height: 18.75rem;
+    width: 23.75rem;
+    padding: 30px;
+    border-radius: 1.25rem;
+    margin-bottom: 60px;
+  }
 }
 
 .screen--history-mode {
