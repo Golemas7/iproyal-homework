@@ -129,21 +129,21 @@ const sortedItems = computed(() => {
 
 <style scoped>
 .history {
+  align-items: flex-end;
   display: flex;
   flex-direction: column;
-  margin-bottom: 1rem;
-  width: 100%;
-  align-items: flex-end;
   gap: 0.25rem;
   height: 100%;
-  overflow-y: hidden;
   justify-content: flex-end;
+  margin-bottom: 16px;
+  overflow-y: hidden;
+  width: 100%;
 }
 
 .history--history-mode {
   overflow-y: auto;
-  padding-right: 0.25rem;
-  gap: 1.5rem;
+  padding-right: 4px;
+  gap: 24px;
   justify-content: flex-start;
 
   .history-entry {
@@ -172,16 +172,17 @@ const sortedItems = computed(() => {
 
 .history-actions {
   position: absolute;
-  bottom: -5rem;
+  bottom: -310px;
+  flex-direction: column;
   display: flex;
   justify-content: space-between;
   width: 100%;
   right: 0;
   font-size: 1.563rem;
-  gap: 2rem;
+  gap: 24px;
 
   .history-action {
-    padding: 0.75rem 1rem;
+    padding: 12px 16px;
   }
 
   /* As per https://www.a11yproject.com/posts/how-to-hide-content/ */
@@ -193,6 +194,13 @@ const sortedItems = computed(() => {
     position: absolute;
     white-space: nowrap;
     width: 1px;
+  }
+}
+
+@media screen and (min-width: 768px) {
+  .history-actions {
+    flex-direction: row;
+    bottom: -80px;
   }
 }
 </style>

@@ -289,31 +289,31 @@ watch(isHistoryMode, (value) => {
 
 <style scoped>
 .calculator-calculations {
-  font-size: 2.5rem;
+  color: #9e9c9c;
   display: flex;
-  width: 100%;
+  font-size: 2.5rem;
   justify-content: flex-end;
   line-height: 1;
-  color: #9e9c9c;
+  width: 100%;
 }
 
 .calculator-action {
-  min-width: 40px;
   color: inherit;
+  min-width: 40px;
   text-align: center;
 }
 
 .calculator-input {
   background: transparent;
   border: none;
-  width: min-content;
-  height: 3.125rem;
-  font-size: inherit;
-  flex-shrink: 1;
+  color: inherit;
   display: inline-block;
+  flex-shrink: 1;
+  font-size: inherit;
+  height: 3.125rem;
   max-width: 140px;
   width: 100%;
-  color: inherit;
+  width: min-content;
 }
 
 .calculator-input:focus {

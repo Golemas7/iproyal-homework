@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { provide, ref } from 'vue'
+import { provide, ref, watch } from 'vue'
 
 // TODO HANDLE ABSOLUTE PATHS
 
 import History from './History.vue'
 import Button from '../Button.vue'
+import { useWindowSize } from '@/utils/window'
 
 export type ResultAndAction = {
   action: CalculatorActions | ''
@@ -51,6 +52,14 @@ provide('isHistoryMode', isHistoryMode)
 const handleButtonClick = (e: CalculatorButton) => {
   resultAndAction.value.onButtonClick(e)
 }
+
+// Handle media queries programically
+const { width } = useWindowSize()
+const isTablet = ref(width.value >= 768)
+
+watch(width, (value) => {
+  isTablet.value = value >= 768
+})
 </script>
 
 <template>
@@ -77,14 +86,15 @@ const handleButtonClick = (e: CalculatorButton) => {
         </template>
       </div>
       <div v-if="!isHistoryMode" class="buttons-container">
-        <template v-for="buttonsRow in buttons">
+        <template v-for="buttonsRow in isTablet ? buttons : buttonsMobile">
           <template v-for="button in buttonsRow">
             <Button
               :type="numberButtons.includes(button) ? 'Secondary' : 'Primary'"
               class="calculator-button"
               @click="handleButtonClick(button)"
               :class="{
-                'two-rows': button === '+'
+                'two-rows': button === '+',
+                'three-columns': button === '='
               }"
             >
               {{ button }}
@@ -98,19 +108,19 @@ const handleButtonClick = (e: CalculatorButton) => {
 
 <style scoped>
 .calculator-inner-container {
-  --max-calculator-width: 28.125rem;
+  --max-calculator-width: 450px;
 
-  width: 100%;
-  max-width: var(--max-calculator-width);
-  height: 59.375rem;
   background-color: #414141;
   border-radius: 40px;
+  height: 1050px;
+  max-width: var(--max-calculator-width);
   padding: 30px 20px;
+  width: 100%;
 }
 
 .title {
-  font-size: 1rem;
   color: white;
+  font-size: 1rem;
   padding-bottom: 0.25rem;
 }
 
@@ -119,54 +129,33 @@ const handleButtonClick = (e: CalculatorButton) => {
 }
 
 .calculator-header {
-  display: flex;
   align-items: center;
+  color: white;
+  display: flex;
+  gap: 32px;
   justify-content: center;
   margin-bottom: 1.5rem;
-  color: white;
-  gap: 2rem;
 }
 
 .screen {
+  align-items: flex-end;
   background-color: #0b0b0b1a;
-  height: 18.75rem;
-  width: 100%;
-  padding: 30px;
-  border-radius: 1.25rem;
+  border-radius: 20px;
+  box-shadow: 5px 5px 60px 0px rgba(11, 11, 11, 0.1);
   display: flex;
   flex-direction: column;
+  height: 300px;
   justify-content: flex-end;
-  align-items: flex-end;
-  margin-bottom: 60px;
-  box-shadow: 5px 5px 60px 0px rgba(11, 11, 11, 0.1);
-  overflow: hidden;
-}
-
-@media screen and (min-width: 768px) {
-  .calculator-inner-container {
-    width: var(--max-calculator-width);
-    height: 59.375rem;
-    border-radius: 2.5rem;
-    padding: 60px 35px;
-  }
-
-  .calculator-header {
-    margin-bottom: 2.5rem;
-  }
-
-  .screen {
-    height: 18.75rem;
-    width: 23.75rem;
-    padding: 30px;
-    border-radius: 1.25rem;
-    margin-bottom: 60px;
-  }
+  overflow: visible;
+  padding: 30px;
+  width: 100%;
+  max-width: 300px;
+  margin: 0 auto 40px;
+  position: relative;
 }
 
 .screen--history-mode {
-  height: 700px;
-  position: relative;
-  overflow: visible;
+  height: 600px;
 }
 
 .result {
@@ -183,24 +172,69 @@ const handleButtonClick = (e: CalculatorButton) => {
 
 .buttons-container {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  grid-template-rows: repeat(5, 1fr);
-  column-gap: 40px;
+  grid-template-rows: repeat(7, 1fr);
+  justify-content: space-between;
+  margin: 0 auto;
+  max-width: 300px;
   row-gap: 20px;
 }
 
 .calculator-button {
-  height: 65px;
-  width: 65px;
   border-radius: 100%;
   border: none;
-  font-size: 1.563rem;
   color: white;
+  font-size: 1.563rem;
+  height: 65px;
+  width: 65px;
 }
 
-.two-rows {
-  grid-row: span 2;
-  height: 150px;
+.three-columns {
   border-radius: 42.5px;
+  grid-column: span 3;
+  width: 100%;
+}
+
+@media screen and (min-width: 768px) {
+  .calculator-inner-container {
+    height: 950px;
+    padding: 60px 35px;
+    width: var(--max-calculator-width);
+  }
+
+  .calculator-header {
+    margin-bottom: 40px;
+  }
+
+  .screen {
+    margin-bottom: 60px;
+    padding: 30px;
+    width: 380px;
+    max-width: none;
+  }
+
+  .screen--history-mode {
+    height: 700px;
+  }
+
+  .two-rows {
+    border-radius: 42.5px;
+    grid-row: span 2;
+    height: 150px;
+  }
+
+  .three-columns {
+    border-radius: 100%;
+    grid-column: span 1;
+    height: 65px;
+  }
+
+  .buttons-container {
+    column-gap: 40px;
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: repeat(5, 1fr);
+    margin: 0;
+    max-width: none;
+    row-gap: 20px;
+  }
 }
 </style>
