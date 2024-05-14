@@ -255,8 +255,6 @@ watch(isHistoryMode, (value) => {
 })
 </script>
 
-<!-- TODO THINK ABOUT REUSING THE CALCULATION VALUE -->
-
 <!-- TODO HANDLE :style width with decimal numbers -->
 <template>
   <div v-if="!isHistoryMode" class="calculator-calculations" @keydown="onKeyboardInput">

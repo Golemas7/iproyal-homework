@@ -2,7 +2,7 @@
 import { computed, inject, provide, ref, watch, type Ref } from 'vue'
 import { saveToFile, readFileData } from '@/utils/file'
 import Calculator from './Calculator.vue'
-import Button from '../Button.vue'
+import Button from '@/components/Button.vue'
 import { parseCsvStringToHistoryItems, parseDataIntoCsvFormat } from './helpers'
 
 export type HistoryItem = {

@@ -1,10 +1,8 @@
 <script setup lang="ts">
 import { provide, ref, watch } from 'vue'
 
-// TODO HANDLE ABSOLUTE PATHS
-
 import History from './History.vue'
-import Button from '../Button.vue'
+import Button from '@/components/Button.vue'
 import { useWindowSize } from '@/utils/window'
 
 export type ResultAndAction = {
@@ -113,6 +111,7 @@ watch(width, (value) => {
   background-color: #414141;
   border-radius: 40px;
   height: 1050px;
+  margin: 0 auto;
   max-width: var(--max-calculator-width);
   padding: 30px 20px;
   width: 100%;
