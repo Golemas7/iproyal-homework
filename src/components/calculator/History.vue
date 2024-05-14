@@ -84,7 +84,10 @@ const sortedItems = computed(() => {
   sortedItemsArray = unsortedItems.sort((a, b) => +b.timeStamp - +a.timeStamp)
 
   if (!isHistoryMode.value) {
-    sortedItemsArray = sortedItemsArray.reverse()
+    const itemsLength = sortedItemsArray.length
+
+    // Get the last 2 items
+    sortedItemsArray = sortedItemsArray.reverse().slice(itemsLength - 2)
   }
   return [...sortedItemsArray]
 })
@@ -128,10 +131,10 @@ const sortedItems = computed(() => {
 .history {
   display: flex;
   flex-direction: column;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
   width: 100%;
   align-items: flex-end;
-  gap: 0.2rem;
+  gap: 0.25rem;
   height: 100%;
   overflow-y: hidden;
   justify-content: flex-end;

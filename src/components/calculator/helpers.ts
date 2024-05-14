@@ -20,10 +20,10 @@ export const parseCsvStringToHistoryItems = (csvString: string): HistoryItem[] =
       }
 
       const historyItem = {
-        value1,
+        value1: parseFloat(value1),
         action,
-        value2,
-        result,
+        value2: parseFloat(value2),
+        result: parseFloat(result),
         timeStamp: new Date(timeStamp)
       }
 
