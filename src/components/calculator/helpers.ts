@@ -1,4 +1,5 @@
 import type { HistoryItem } from './History.vue'
+import type { CalculatorActions } from './ResultAndAction.vue'
 
 export const parseCsvStringToHistoryItems = (csvString: string): HistoryItem[] => {
   if (!csvString) {
@@ -56,4 +57,25 @@ export const parseDataIntoCsvFormat = (data: HistoryItem[], headerString = ''): 
 
 export const parseNumberValueFromString = (value: string): number => {
   return value.includes('.') ? parseFloat(value) : parseInt(value)
+}
+
+export const calculateResult = (
+  value1: number,
+  value2: number,
+  action: CalculatorActions | ''
+): number | undefined => {
+  switch (action) {
+    case '^':
+      return Math.pow(value1, value2)
+    case '/':
+      return value1 / value2
+    case 'X':
+      return value1 * value2
+    case '+':
+      return value1 + value2
+    case '-':
+      return value1 - value2
+    default:
+      return 0
+  }
 }

@@ -6,6 +6,7 @@ import {
   type ResultAndAction
 } from './ResultAndAction.vue'
 import type { History, HistoryItem } from './History.vue'
+import { calculateResult } from './helpers'
 
 type InputData = {
   value1: number
@@ -29,27 +30,6 @@ const { value: resultAndAction } = inject<Ref<ResultAndAction>>(
 // Inject the data for binding with history
 const { value: history } = inject<Ref<History>>('history') as Ref<History>
 const isHistoryMode = inject<Ref<Boolean>>('isHistoryMode') as Ref<Boolean>
-
-const calculateResult = (
-  value1: number,
-  value2: number,
-  action: CalculatorActions | ''
-): number | undefined => {
-  switch (action) {
-    case '^':
-      return Math.pow(value1, value2)
-    case '/':
-      return value1 / value2
-    case 'X':
-      return value1 * value2
-    case '+':
-      return value1 + value2
-    case '-':
-      return value1 - value2
-    default:
-      return 0
-  }
-}
 
 const handleHistoryClick = (historyItem: HistoryItem, handleResultClick?: boolean) => {
   const { value1, action, value2, result } = historyItem
@@ -256,6 +236,7 @@ watch(isHistoryMode, (value) => {
 })
 </script>
 
+<!-- TODO Add git hooks -->
 <!-- TODO HANDLE :style width with decimal numbers -->
 <template>
   <div v-if="!isHistoryMode" class="calculator-calculations" @keydown="onKeyboardInput">
