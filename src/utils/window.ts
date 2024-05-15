@@ -2,9 +2,8 @@ import { onMounted, onUnmounted, ref } from 'vue'
 
 /**
  * Reactive window size.
- *
- * @see https://vueuse.org/useWindowSize
- * @param options
+ * Inspired by:
+ * https://vueuse.org/useWindowSize
  */
 export function useWindowSize() {
   const width = ref(Number.POSITIVE_INFINITY)

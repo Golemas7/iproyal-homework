@@ -283,6 +283,7 @@ watch(inputData, (value) => {
 })
 </script>
 
+<!-- TODO Update readme file -->
 <!-- TODO Add git hooks -->
 <!-- TODO Optimize/limit and clean up inputs and their legths -->
 <!-- TODO Add 1.e + x when number is too big for limited input -->
