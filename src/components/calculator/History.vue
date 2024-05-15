@@ -6,9 +6,9 @@ import Button from '@/components/Button.vue'
 import { parseCsvStringToHistoryItems, parseDataIntoCsvFormat } from './helpers'
 
 export type HistoryItem = {
-  value1: number
+  value1: string
   action: string
-  value2: number
+  value2: string
   result: number
   timeStamp: Date
 }

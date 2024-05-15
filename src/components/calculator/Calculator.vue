@@ -6,17 +6,17 @@ import {
   type ResultAndAction
 } from './ResultAndAction.vue'
 import type { History, HistoryItem } from './History.vue'
-import { calculateResult } from './helpers'
+import { calculateResult, insertTextAtCursor } from './helpers'
 
 type InputData = {
-  value1: number
-  value2: number
+  value1: string
+  value2: string
   currentInputActive: 'value1' | 'value2'
 }
 
 const { value: inputData } = ref<InputData>({
-  value1: 0,
-  value2: 0,
+  value1: '',
+  value2: '',
   currentInputActive: 'value1'
 })
 const input1 = ref<HTMLInputElement | null>(null)
@@ -36,8 +36,8 @@ const handleHistoryClick = (historyItem: HistoryItem, handleResultClick?: boolea
 
   if (handleResultClick) {
     resultAndAction.action = ''
-    inputData.value1 = result || 0
-    inputData.value2 = 0
+    inputData.value1 = result.toString() || '0'
+    inputData.value2 = '0'
     resultAndAction.result = null
   } else {
     resultAndAction.action = action as CalculatorActions
@@ -68,6 +68,15 @@ const restartCalculationWithResultValue = (buttonValue: CalculatorButton) => {
   }
 }
 
+const shouldIgnoreButton = (key: string, currentValue: string) => {
+  const isTryingToEnterMultipleLeadingZeros =
+    key === '0' && resultAndAction.result === null && currentValue === '0'
+  const isTryingToEnterMultipleDecimalPoints =
+    key === '.' && resultAndAction.result === null && currentValue?.includes('.')
+
+  return isTryingToEnterMultipleLeadingZeros || isTryingToEnterMultipleDecimalPoints
+}
+
 // TODO HANDLE FLOAT VALUES
 const handleButtonClick = (buttonValue: CalculatorButton) => {
   restartCalculationWithResultValue(buttonValue)
@@ -75,11 +84,27 @@ const handleButtonClick = (buttonValue: CalculatorButton) => {
   const isANumber = !isNaN(parseInt(buttonValue))
 
   if (isANumber || buttonValue === '.') {
-    // Handle number inputs
-    const oldNumber = inputData[inputData.currentInputActive]
-    const newNumber = '' + oldNumber + buttonValue
+    if (shouldIgnoreButton(buttonValue, inputData[inputData.currentInputActive])) {
+      return
+    }
 
-    inputData[inputData.currentInputActive] = parseFloat(newNumber)
+    if (inputData.currentInputActive === 'value1') {
+      // If we have 0 and type in a different number, override it
+      let newValue =
+        inputData.value1 === '0' && buttonValue !== '.'
+          ? buttonValue
+          : insertTextAtCursor(input1?.value, buttonValue)
+
+      inputData.value1 = newValue
+    } else {
+      // If we have 0 and type in a different number, override it
+      const newValue =
+        inputData.value1 === '0' && buttonValue !== '.'
+          ? buttonValue
+          : insertTextAtCursor(input2?.value, buttonValue)
+
+      inputData.value2 = newValue
+    }
   } else if (buttonValue === '↹') {
     // Handle switching the inputs
     if (inputData.currentInputActive === 'value1') {
@@ -98,7 +123,11 @@ const handleButtonClick = (buttonValue: CalculatorButton) => {
     }
 
     // Calculate the value
-    const newValue = calculateResult(inputData.value1, inputData.value2, resultAndAction.action)
+    const newValue = calculateResult(
+      inputData.value1 || '0',
+      inputData.value2 || '0',
+      resultAndAction.action
+    )
 
     // Set the result
     resultAndAction.result = newValue ?? null
@@ -118,9 +147,9 @@ const handleButtonClick = (buttonValue: CalculatorButton) => {
   } else if (buttonValue === 'C') {
     // Handle clear
 
-    inputData.value1 = 0
+    inputData.value1 = ''
     resultAndAction.action = ''
-    inputData.value2 = 0
+    inputData.value2 = ''
     resultAndAction.result = null
     inputData.currentInputActive = 'value1'
 
@@ -141,7 +170,7 @@ const onInputChange = (event: Event, valueName: 'value1' | 'value2') => {
   const newValue = target.value
 
   if (newValue === '') {
-    inputData[valueName] = 0
+    inputData[valueName] = ''
   }
 }
 
@@ -187,14 +216,18 @@ const onKeyboardInput = (e: KeyboardEvent) => {
   }
 }
 
-const onIputKeyDown = (e: KeyboardEvent) => {
+const onIputKeyDown = (e: KeyboardEvent, currentValue?: string) => {
   const isANumber = !isNaN(parseInt(e.key))
+  const ignoreButton = shouldIgnoreButton(e.key, currentValue ?? '')
 
   if (!isANumber && e.key !== 'Backspace' && e.key !== 'Delete' && e.key !== '.') {
     e.preventDefault()
     e.stopPropagation()
 
     onKeyboardInput(e)
+  } else if (ignoreButton) {
+    e.preventDefault()
+    e.stopPropagation()
   } else if (resultAndAction.result !== null && e.key !== '=') {
     if (isANumber) {
       restartCalculationWithResultValue(e.key as CalculatorButton)
@@ -203,6 +236,9 @@ const onIputKeyDown = (e: KeyboardEvent) => {
     }
 
     resultAndAction.result = null
+  } else if (currentValue === '0' && isANumber) {
+    // Override the 0
+    inputData[inputData.currentInputActive] = ''
   }
 }
 
@@ -243,11 +279,12 @@ watch(isHistoryMode, (value) => {
     <input
       ref="input1"
       autofocus
-      :style="{ width: `${inputData.value1.toString().length * 1.2}ch` }"
-      type="number"
+      :style="{ width: `${(inputData.value1.length || 1) * 1.2}ch` }"
+      type="text"
       v-model="inputData.value1"
       class="calculator-input"
-      @keydown="onIputKeyDown($event)"
+      placeholder="0"
+      @keydown="(e) => onIputKeyDown(e, inputData.value1)"
       @input="(e) => onInputChange(e, 'value1')"
       @blur="(e) => onInputBlur(e, 'value1')"
       @click="onFocusChanged('value1')"
@@ -255,11 +292,12 @@ watch(isHistoryMode, (value) => {
     <span class="calculator-action">{{ resultAndAction.action.toLocaleLowerCase() || '+' }}</span>
     <input
       ref="input2"
-      :style="{ width: `${inputData.value2.toString().length * 1.2}ch` }"
-      type="number"
+      :style="{ width: `${(inputData.value2.length || 1) * 1.2}ch` }"
+      type="text"
       v-model="inputData.value2"
+      placeholder="0"
       class="calculator-input"
-      @keydown="onIputKeyDown($event)"
+      @keydown="(e) => onIputKeyDown(e, inputData.value2)"
       @input="(e) => onInputChange(e, 'value2')"
       @blur="(e) => onInputBlur(e, 'value2')"
       @click="onFocusChanged('value2')"
