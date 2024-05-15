@@ -6,7 +6,7 @@ import {
   type ResultAndAction
 } from './ResultAndAction.vue'
 import type { History, HistoryItem } from './History.vue'
-import { calculateResult, insertTextAtCursor } from './helpers'
+import { calculateInputWidth, calculateResult, insertTextAtCursor } from './helpers'
 
 type InputData = {
   value1: string
@@ -21,6 +21,9 @@ const { value: inputData } = ref<InputData>({
 })
 const input1 = ref<HTMLInputElement | null>(null)
 const input2 = ref<HTMLInputElement | null>(null)
+
+const input1Width = ref('1.2ch')
+const input2Width = ref('1.2ch')
 
 // Inject the data for binding with result and action
 const { value: resultAndAction } = inject<Ref<ResultAndAction>>(
@@ -62,8 +65,8 @@ const handleHistoryResultClick = (historyItem: HistoryItem) => {
 // Start a new calculcation with the result as a starting point
 const restartCalculationWithResultValue = (buttonValue: CalculatorButton) => {
   if (buttonValue !== '=' && resultAndAction.result !== null) {
-    inputData.value1 = resultAndAction.result
-    inputData.value2 = 0
+    inputData.value1 = resultAndAction.result.toString()
+    inputData.value2 = ''
     resultAndAction.result = null
   }
 }
@@ -73,21 +76,25 @@ const shouldIgnoreButton = (key: string, currentValue: string) => {
     key === '0' && resultAndAction.result === null && currentValue === '0'
   const isTryingToEnterMultipleDecimalPoints =
     key === '.' && resultAndAction.result === null && currentValue?.includes('.')
+  const isTryngToCalculateAFinishedCalculation = key === '=' && resultAndAction.result !== null
 
-  return isTryingToEnterMultipleLeadingZeros || isTryingToEnterMultipleDecimalPoints
+  return (
+    isTryingToEnterMultipleLeadingZeros ||
+    isTryingToEnterMultipleDecimalPoints ||
+    isTryngToCalculateAFinishedCalculation
+  )
 }
 
-// TODO HANDLE FLOAT VALUES
 const handleButtonClick = (buttonValue: CalculatorButton) => {
+  if (shouldIgnoreButton(buttonValue, inputData[inputData.currentInputActive])) {
+    return
+  }
+
   restartCalculationWithResultValue(buttonValue)
 
   const isANumber = !isNaN(parseInt(buttonValue))
 
   if (isANumber || buttonValue === '.') {
-    if (shouldIgnoreButton(buttonValue, inputData[inputData.currentInputActive])) {
-      return
-    }
-
     if (inputData.currentInputActive === 'value1') {
       // If we have 0 and type in a different number, override it
       let newValue =
@@ -135,9 +142,9 @@ const handleButtonClick = (buttonValue: CalculatorButton) => {
     // Create history entry
 
     const newHistoryItem = {
-      value1: inputData.value1,
+      value1: inputData.value1 || '0',
       action: resultAndAction.action as CalculatorActions,
-      value2: inputData.value2,
+      value2: inputData.value2 || '0',
       result: resultAndAction.result ?? 0,
       timeStamp: new Date()
     }
@@ -270,16 +277,22 @@ watch(isHistoryMode, (value) => {
     }
   }
 })
+
+watch(inputData, (value) => {
+  const { value1, value2 } = value
+
+  input1Width.value = calculateInputWidth(value1)
+  input2Width.value = calculateInputWidth(value2)
+})
 </script>
 
 <!-- TODO Add git hooks -->
-<!-- TODO HANDLE :style width with decimal numbers -->
 <template>
   <div v-if="!isHistoryMode" class="calculator-calculations" @keydown="onKeyboardInput">
     <input
       ref="input1"
       autofocus
-      :style="{ width: `${(inputData.value1.length || 1) * 1.2}ch` }"
+      :style="{ width: input1Width }"
       type="text"
       v-model="inputData.value1"
       class="calculator-input"
@@ -289,10 +302,10 @@ watch(isHistoryMode, (value) => {
       @blur="(e) => onInputBlur(e, 'value1')"
       @click="onFocusChanged('value1')"
     />
-    <span class="calculator-action">{{ resultAndAction.action.toLocaleLowerCase() || '+' }}</span>
+    <span class="calculator-action">{{ resultAndAction.action.toLocaleLowerCase() || '_' }}</span>
     <input
       ref="input2"
-      :style="{ width: `${(inputData.value2.length || 1) * 1.2}ch` }"
+      :style="{ width: input2Width }"
       type="text"
       v-model="inputData.value2"
       placeholder="0"

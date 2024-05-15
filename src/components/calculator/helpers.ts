@@ -136,3 +136,20 @@ export const insertTextAtCursor = (
   // Return new text content
   return element?.value
 }
+
+export const calculateInputWidth = (inputValue?: string) => {
+  let width = 1.2
+
+  const floatNumberSize = 0.3
+  const characterSize = 1.2
+
+  const hasFloatCharacter = inputValue?.includes('.')
+  const floatCharacterModifyer = hasFloatCharacter ? 1 : 0
+
+  if (inputValue?.length && inputValue?.length > 0) {
+    width =
+      inputValue.replace('.', '').length * characterSize + floatCharacterModifyer * floatNumberSize
+  }
+
+  return `${width}ch`
+}
