@@ -70,9 +70,8 @@ watch(importData, (data) => {
     // Merge with current history items
     const currentHistoryItems = [...history.value.items]
     const combinedHistoryItems = [...currentHistoryItems, ...importedHistoryItems]
-    const sortedItems = [...combinedHistoryItems]
 
-    history.value.items = sortedItems
+    history.value.items = combinedHistoryItems
   }
 })
 

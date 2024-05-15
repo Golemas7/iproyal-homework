@@ -59,6 +59,35 @@ export const parseNumberValueFromString = (value: string): number => {
   return value.includes('.') ? parseFloat(value) : parseInt(value)
 }
 
+export const insertTextAtCursor = (
+  element?: HTMLInputElement | null,
+  text?: string,
+  isBefore = true
+): string => {
+  if (!element || !text) {
+    return ''
+  }
+
+  // Ensure the input element is focused
+  element.focus()
+
+  // Get the current selection range in the input element
+  let start = element?.selectionStart
+  let end = element?.selectionEnd
+
+  // Determine the new cursor position
+  let newPos = (isBefore ? start : end) ?? 0
+
+  // Insert the text at the current selection
+  element?.setRangeText(text, newPos, newPos, 'end')
+
+  // Update the cursor position after insertion
+  element?.setSelectionRange(newPos + text.length, newPos + text.length)
+
+  // Return new text content
+  return element?.value
+}
+
 export const calculateResult = (
   value1: string,
   value2: string,
@@ -108,35 +137,6 @@ export const calculateResult = (
   }
 }
 
-export const insertTextAtCursor = (
-  element?: HTMLInputElement | null,
-  text?: string,
-  isBefore = true
-): string => {
-  if (!element || !text) {
-    return ''
-  }
-
-  // Ensure the input element is focused
-  element.focus()
-
-  // Get the current selection range in the input element
-  let start = element?.selectionStart
-  let end = element?.selectionEnd
-
-  // Determine the new cursor position
-  let newPos = (isBefore ? start : end) ?? 0
-
-  // Insert the text at the current selection
-  element?.setRangeText(text, newPos, newPos, 'end')
-
-  // Update the cursor position after insertion
-  element?.setSelectionRange(newPos + text.length, newPos + text.length)
-
-  // Return new text content
-  return element?.value
-}
-
 export const calculateInputWidth = (inputValue?: string) => {
   let width = 1.2
 
@@ -152,4 +152,21 @@ export const calculateInputWidth = (inputValue?: string) => {
   }
 
   return `${width}ch`
+}
+
+export const shouldIgnoreButtonInput = (
+  key: string,
+  currentValue: string,
+  result: number | null
+) => {
+  const isTryingToEnterMultipleLeadingZeros = key === '0' && result === null && currentValue === '0'
+  const isTryingToEnterMultipleDecimalPoints =
+    key === '.' && result === null && currentValue?.includes('.')
+  const isTryngToCalculateAFinishedCalculation = key === '=' && result !== null
+
+  return (
+    isTryingToEnterMultipleLeadingZeros ||
+    isTryingToEnterMultipleDecimalPoints ||
+    isTryngToCalculateAFinishedCalculation
+  )
 }

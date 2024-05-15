@@ -6,12 +6,19 @@ import {
   type ResultAndAction
 } from './ResultAndAction.vue'
 import type { History, HistoryItem } from './History.vue'
-import { calculateInputWidth, calculateResult, insertTextAtCursor } from './helpers'
+import {
+  calculateInputWidth,
+  calculateResult,
+  insertTextAtCursor,
+  shouldIgnoreButtonInput
+} from './helpers'
+
+type InputType = 'value1' | 'value2'
 
 type InputData = {
   value1: string
   value2: string
-  currentInputActive: 'value1' | 'value2'
+  currentInputActive: InputType
 }
 
 const { value: inputData } = ref<InputData>({
@@ -71,22 +78,16 @@ const restartCalculationWithResultValue = (buttonValue: CalculatorButton) => {
   }
 }
 
-const shouldIgnoreButton = (key: string, currentValue: string) => {
-  const isTryingToEnterMultipleLeadingZeros =
-    key === '0' && resultAndAction.result === null && currentValue === '0'
-  const isTryingToEnterMultipleDecimalPoints =
-    key === '.' && resultAndAction.result === null && currentValue?.includes('.')
-  const isTryngToCalculateAFinishedCalculation = key === '=' && resultAndAction.result !== null
-
-  return (
-    isTryingToEnterMultipleLeadingZeros ||
-    isTryingToEnterMultipleDecimalPoints ||
-    isTryngToCalculateAFinishedCalculation
-  )
-}
-
+// Handle calculator button click OR an action click from keyboard
+// CORE Logic
 const handleButtonClick = (buttonValue: CalculatorButton) => {
-  if (shouldIgnoreButton(buttonValue, inputData[inputData.currentInputActive])) {
+  if (
+    shouldIgnoreButtonInput(
+      buttonValue,
+      inputData[inputData.currentInputActive],
+      resultAndAction.result
+    )
+  ) {
     return
   }
 
@@ -106,7 +107,7 @@ const handleButtonClick = (buttonValue: CalculatorButton) => {
     } else {
       // If we have 0 and type in a different number, override it
       const newValue =
-        inputData.value1 === '0' && buttonValue !== '.'
+        inputData.value2 === '0' && buttonValue !== '.'
           ? buttonValue
           : insertTextAtCursor(input2?.value, buttonValue)
 
@@ -172,18 +173,9 @@ const handleButtonClick = (buttonValue: CalculatorButton) => {
   }
 }
 
-const onInputChange = (event: Event, valueName: 'value1' | 'value2') => {
-  const target = event.target as HTMLInputElement
-  const newValue = target.value
-
-  if (newValue === '') {
-    inputData[valueName] = ''
-  }
-}
-
 // TODO HANDLE ACCESSIBILITY CASES
 // Instead of holding the users focus, we could just use the active variable to add to value
-const onInputBlur = (e: Event, valueName: 'value1' | 'value2') => {
+const onInputBlur = (e: Event, valueName: InputType) => {
   // We set a timeout, so click will register first before we start processing if new input was clicked. We need this, because the blur event is fired first.
   setTimeout(() => {
     if (inputData.currentInputActive === valueName) {
@@ -200,10 +192,11 @@ const onInputBlur = (e: Event, valueName: 'value1' | 'value2') => {
   }, 100)
 }
 
-const onFocusChanged = (valueName: 'value1' | 'value2') => {
+const onFocusChanged = (valueName: InputType) => {
   inputData.currentInputActive = valueName
 }
 
+// Check validity of keyboard input keys and remap some to appropriate ones
 const onKeyboardInput = (e: KeyboardEvent) => {
   const key = e.key.toUpperCase()
   const validKeys = ['C', '^', '/', 'X', '-', '+', '=', 'TAB', '*', 'ENTER']
@@ -223,9 +216,10 @@ const onKeyboardInput = (e: KeyboardEvent) => {
   }
 }
 
+// Filter out what gets through to the input
 const onIputKeyDown = (e: KeyboardEvent, currentValue?: string) => {
   const isANumber = !isNaN(parseInt(e.key))
-  const ignoreButton = shouldIgnoreButton(e.key, currentValue ?? '')
+  const ignoreButton = shouldIgnoreButtonInput(e.key, currentValue ?? '', resultAndAction.result)
 
   if (!isANumber && e.key !== 'Backspace' && e.key !== 'Delete' && e.key !== '.') {
     e.preventDefault()
@@ -254,6 +248,7 @@ resultAndAction.onButtonClick = handleButtonClick
 history.setCurrentCalculationToEntry = handleHistoryEntryClick
 history.setCurrentCalculationToResult = handleHistoryResultClick
 
+// Retain focus when switching between calcaulation and history mode
 watch(isHistoryMode, (value) => {
   if (!value) {
     if (resultAndAction.action) {
@@ -278,6 +273,8 @@ watch(isHistoryMode, (value) => {
   }
 })
 
+// Recalculate the width of the inputs when the input data changes
+// TODO Optimize this to reduce recalculation amount
 watch(inputData, (value) => {
   const { value1, value2 } = value
 
@@ -287,6 +284,8 @@ watch(inputData, (value) => {
 </script>
 
 <!-- TODO Add git hooks -->
+<!-- TODO Optimize/limit and clean up inputs and their legths -->
+<!-- TODO Add 1.e + x when number is too big for limited input -->
 <template>
   <div v-if="!isHistoryMode" class="calculator-calculations" @keydown="onKeyboardInput">
     <input
@@ -298,7 +297,6 @@ watch(inputData, (value) => {
       class="calculator-input"
       placeholder="0"
       @keydown="(e) => onIputKeyDown(e, inputData.value1)"
-      @input="(e) => onInputChange(e, 'value1')"
       @blur="(e) => onInputBlur(e, 'value1')"
       @click="onFocusChanged('value1')"
     />
@@ -311,7 +309,6 @@ watch(inputData, (value) => {
       placeholder="0"
       class="calculator-input"
       @keydown="(e) => onIputKeyDown(e, inputData.value2)"
-      @input="(e) => onInputChange(e, 'value2')"
       @blur="(e) => onInputBlur(e, 'value2')"
       @click="onFocusChanged('value2')"
     />
