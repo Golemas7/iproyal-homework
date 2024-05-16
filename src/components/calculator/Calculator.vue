@@ -48,12 +48,12 @@ const handleHistoryClick = (historyItem: HistoryItem, handleResultClick?: boolea
     resultAndAction.action = ''
     inputData.value1 = result.toString() || '0'
     inputData.value2 = '0'
-    resultAndAction.result = null
+    resultAndAction.result = ''
   } else {
     resultAndAction.action = action as CalculatorActions
     inputData.value1 = value1
     inputData.value2 = value2
-    resultAndAction.result = null
+    resultAndAction.result = ''
   }
 
   inputData.currentInputActive = 'value2'
@@ -71,10 +71,10 @@ const handleHistoryResultClick = (historyItem: HistoryItem) => {
 // Clear the result if a previous calculation has just finished and we start typing
 // Start a new calculcation with the result as a starting point
 const restartCalculationWithResultValue = (buttonValue: CalculatorButton) => {
-  if (buttonValue !== '=' && resultAndAction.result !== null) {
-    inputData.value1 = resultAndAction.result.toString()
+  if (buttonValue !== '=' && resultAndAction.result !== '') {
+    inputData.value1 = resultAndAction.result
     inputData.value2 = ''
-    resultAndAction.result = null
+    resultAndAction.result = ''
   }
 }
 
@@ -138,7 +138,7 @@ const handleButtonClick = (buttonValue: CalculatorButton) => {
     )
 
     // Set the result
-    resultAndAction.result = newValue ?? null
+    resultAndAction.result = newValue ?? ''
 
     // Create history entry
 
@@ -146,7 +146,7 @@ const handleButtonClick = (buttonValue: CalculatorButton) => {
       value1: inputData.value1 || '0',
       action: resultAndAction.action as CalculatorActions,
       value2: inputData.value2 || '0',
-      result: resultAndAction.result ?? 0,
+      result: resultAndAction.result ?? '',
       timeStamp: new Date()
     }
 
@@ -158,7 +158,7 @@ const handleButtonClick = (buttonValue: CalculatorButton) => {
     inputData.value1 = ''
     resultAndAction.action = ''
     inputData.value2 = ''
-    resultAndAction.result = null
+    resultAndAction.result = ''
     inputData.currentInputActive = 'value1'
 
     input1.value?.focus()
@@ -233,14 +233,14 @@ const onIputKeyDown = (e: KeyboardEvent, currentValue = '') => {
   } else if (ignoreButton) {
     e.preventDefault()
     e.stopPropagation()
-  } else if (resultAndAction.result !== null && e.key !== '=') {
+  } else if (resultAndAction.result !== '' && e.key !== '=') {
     if (isANumber) {
       restartCalculationWithResultValue(e.key as CalculatorButton)
     } else {
       restartCalculationWithResultValue('0')
     }
 
-    resultAndAction.result = null
+    resultAndAction.result = ''
   } else if (currentValue === '0' && isANumber) {
     // Override the 0
     inputData[inputData.currentInputActive] = ''

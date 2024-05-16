@@ -93,7 +93,7 @@ export const calculateResult = (
   value1: string,
   value2: string,
   action: CalculatorActions | ''
-): number | undefined => {
+): string | undefined => {
   const value1Number = parseFloat(value1)
   const value2Number = parseFloat(value2)
 
@@ -104,6 +104,8 @@ export const calculateResult = (
   const decimalPointOffset =
     decimalPointValue1 > decimalPointValue2 ? decimalPointValue1 : decimalPointValue2
   const decimalPointModifier = Math.pow(10, decimalPointOffset)
+
+  let result: string | number | undefined
 
   switch (action) {
     case '^':
@@ -116,30 +118,50 @@ export const calculateResult = (
       // const cleanedPowResult =
       //   powResult.toString().length > MAX_INPUT_LENGTH ? powResult.toExponential() : powResult
 
-      return powResult
+      result = powResult
+
+      break
     case '/':
       const divValue1 = Math.floor(value1Number * decimalPointModifier)
       const divValue2 = Math.floor(value2Number * decimalPointModifier)
 
-      return divValue1 / divValue2
+      const divResult = divValue1 / divValue2
+
+      result = divResult
+
+      break
     case 'X':
       const mulValue1 = Math.floor(value1Number * decimalPointModifier)
       const mulValue2 = Math.floor(value2Number * decimalPointModifier)
 
-      return (mulValue1 * mulValue2) / Math.pow(decimalPointModifier, 2)
+      const mulResult = (mulValue1 * mulValue2) / Math.pow(decimalPointModifier, 2)
+
+      result = mulResult
+
+      break
     case '+':
       const addValue1 = Math.floor(value1Number * decimalPointModifier)
       const addValue2 = Math.floor(value2Number * decimalPointModifier)
 
-      return (addValue1 + addValue2) / decimalPointModifier
+      const addResult = (addValue1 + addValue2) / decimalPointModifier
+
+      result = addResult
+
+      break
     case '-':
       const subValue1 = Math.floor(value1Number * decimalPointModifier)
       const subValue2 = Math.floor(value2Number * decimalPointModifier)
 
-      return (subValue1 - subValue2) / decimalPointModifier
+      const subResult = (subValue1 - subValue2) / decimalPointModifier
+
+      result = subResult
+
+      break
     default:
-      return 0
+      result = 0
   }
+
+  return result !== undefined ? result.toString() : result
 }
 
 export const calculateInputWidth = (inputValue?: string) => {
@@ -166,14 +188,14 @@ export const shouldIgnoreButtonInput = ({
 }: {
   key: string
   currentValue: string
-  result: number | null
+  result: string
 }) => {
   const isNumber = !isNaN(parseInt(key))
 
-  const isTryingToEnterMultipleLeadingZeros = key === '0' && result === null && currentValue === '0'
+  const isTryingToEnterMultipleLeadingZeros = key === '0' && result === '' && currentValue === '0'
   const isTryingToEnterMultipleDecimalPoints =
-    key === '.' && result === null && currentValue?.includes('.')
-  const isTryngToCalculateAFinishedCalculation = key === '=' && result !== null
+    key === '.' && result === '' && currentValue?.includes('.')
+  const isTryngToCalculateAFinishedCalculation = key === '=' && result !== ''
   const isTryingToExceedMaximumLength =
     currentValue.length >= MAX_INPUT_LENGTH && (isNumber || key === '.')
 

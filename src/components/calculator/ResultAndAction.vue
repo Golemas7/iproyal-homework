@@ -7,7 +7,7 @@ import { useWindowSize } from '@/utils/window'
 
 export type ResultAndAction = {
   action: CalculatorActions | ''
-  result: number | null
+  result: string
   onButtonClick: (e: CalculatorButton) => void
 }
 
@@ -38,7 +38,7 @@ const numberButtons = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
 
 const resultAndAction = ref<ResultAndAction>({
   action: '',
-  result: null,
+  result: '',
   onButtonClick: (e: CalculatorButton) => {}
 })
 const isHistoryMode = ref(false)

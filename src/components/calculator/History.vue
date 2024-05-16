@@ -9,7 +9,7 @@ export type HistoryItem = {
   value1: string
   action: string
   value2: string
-  result: number
+  result: string
   timeStamp: Date
 }
 
