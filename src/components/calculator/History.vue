@@ -19,6 +19,8 @@ export type History = {
   setCurrentCalculationToResult: (entry: HistoryItem) => void
 }
 
+const allowedExtensions = '.xls,.xlsx,.csv'
+
 const input = ref<HTMLInputElement | null>(null)
 const importData = ref<string>('')
 const history = ref<History>({
@@ -50,7 +52,7 @@ const onHistoryClear = () => {
 }
 
 const onFileAttached = (e: Event) => {
-  readFileData(e, importData)
+  readFileData(e, importData, allowedExtensions.split(','))
 }
 
 const handleButtonClick = (historyItem: HistoryItem, isResult?: boolean) => {
@@ -121,7 +123,7 @@ const sortedItems = computed(() => {
       tabindex="-1"
       class="history-action--hidden"
       type="file"
-      accept=".xls,.xlsx,.csv"
+      :accept="allowedExtensions"
       @change="onFileAttached($event)"
     />
     <Button type="Secondary" class="history-action" @click="onHistoryClear">Clear</Button>

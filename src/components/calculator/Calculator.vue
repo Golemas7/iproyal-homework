@@ -290,8 +290,6 @@ watch(inputData, (value) => {
 <!-- TODO Fix import with wrong files or wrong format files -->
 <!-- TODO Update readme file -->
 <!-- TODO Add git hooks -->
-<!-- TODO Optimize/limit and clean up inputs and their legths -->
-<!-- TODO Add 1.e + x when number is too big for limited input -->
 <!-- TODO Optimize stylesheets with a more extensive global config with variables -->
 <template>
   <div v-if="!isHistoryMode" class="calculator-calculations" @keydown="onKeyboardInput">

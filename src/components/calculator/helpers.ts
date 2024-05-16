@@ -17,7 +17,20 @@ export const parseCsvStringToHistoryItems = (csvString: string): HistoryItem[] =
 
       const [value1, action, value2, result, timeStamp] = historyItemString.split(',')
 
-      if (!value1 || !action || !value2 || !result || !timeStamp) {
+      const hasMissingValues = !value1 || !action || !value2 || !result || !timeStamp
+
+      if (hasMissingValues) {
+        return
+      }
+
+      const invalidValues =
+        isNaN(parseFloat(value1)) || isNaN(parseFloat(value2)) || isNaN(parseFloat(result))
+      const invalidDate = new Date(timeStamp).toString() === 'Invalid Date'
+      const invalidAction = !/^[\^\/Xx\-+]+$/.test(action)
+
+      const hasInvalidValues = invalidValues || invalidDate || invalidAction
+
+      if (hasInvalidValues) {
         return
       }
 
@@ -25,7 +38,7 @@ export const parseCsvStringToHistoryItems = (csvString: string): HistoryItem[] =
         value1,
         action,
         value2,
-        result: parseFloat(result),
+        result,
         timeStamp: new Date(timeStamp)
       }
 

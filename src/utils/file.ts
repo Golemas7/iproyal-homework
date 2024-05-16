@@ -29,11 +29,22 @@ export const saveToFile = (filename: string, data: string) => {
 
 // Partial code from https://stackoverflow.com/a/50578313
 // Since readAsBinaryString is deprecated in favor of readAsArrayBuffer, we use readAsArrayBuffer instead
-export const readFileData = <T>(e: Event, dataRef: Ref<T>) => {
+export const readFileData = <T>(e: Event, dataRef: Ref<T>, allowedFileExtensions?: string[]) => {
   const target = e.target as HTMLInputElement
 
   if (target?.files && target?.files?.[0]) {
     const myFile = target?.files?.[0]
+    const fileExtension = getFileExtension(myFile)
+
+    // If our allowed file extensions do not include this file
+    if (
+      allowedFileExtensions &&
+      allowedFileExtensions?.length > 0 &&
+      !allowedFileExtensions.includes(`.${fileExtension}`)
+    ) {
+      return
+    }
+
     const reader = new FileReader()
 
     reader.addEventListener('load', (e) => {
@@ -48,4 +59,10 @@ export const readFileData = <T>(e: Event, dataRef: Ref<T>) => {
 
     reader.readAsArrayBuffer(myFile)
   }
+}
+
+export const getFileExtension = (file: File): string => {
+  const fileName = file.name
+
+  return fileName.slice((Math.max(0, fileName.lastIndexOf('.')) || Infinity) + 1)
 }
