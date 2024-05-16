@@ -287,7 +287,6 @@ watch(inputData, (value) => {
 })
 </script>
 
-<!-- TODO Add git hooks -->
 <!-- TODO Optimize stylesheets with a more extensive global config with variables -->
 <template>
   <div v-if="!isHistoryMode" class="calculator-calculations" @keydown="onKeyboardInput">
