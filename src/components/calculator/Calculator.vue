@@ -82,11 +82,11 @@ const restartCalculationWithResultValue = (buttonValue: CalculatorButton) => {
 // CORE Logic
 const handleButtonClick = (buttonValue: CalculatorButton) => {
   if (
-    shouldIgnoreButtonInput(
-      buttonValue,
-      inputData[inputData.currentInputActive],
-      resultAndAction.result
-    )
+    shouldIgnoreButtonInput({
+      key: buttonValue,
+      currentValue: inputData[inputData.currentInputActive],
+      result: resultAndAction.result
+    })
   ) {
     return
   }
@@ -217,9 +217,13 @@ const onKeyboardInput = (e: KeyboardEvent) => {
 }
 
 // Filter out what gets through to the input
-const onIputKeyDown = (e: KeyboardEvent, currentValue?: string) => {
+const onIputKeyDown = (e: KeyboardEvent, currentValue = '') => {
   const isANumber = !isNaN(parseInt(e.key))
-  const ignoreButton = shouldIgnoreButtonInput(e.key, currentValue ?? '', resultAndAction.result)
+  const ignoreButton = shouldIgnoreButtonInput({
+    key: e.key,
+    currentValue,
+    result: resultAndAction.result
+  })
 
   if (!isANumber && e.key !== 'Backspace' && e.key !== 'Delete' && e.key !== '.') {
     e.preventDefault()
@@ -283,10 +287,12 @@ watch(inputData, (value) => {
 })
 </script>
 
+<!-- TODO Fix import with wrong files or wrong format files -->
 <!-- TODO Update readme file -->
 <!-- TODO Add git hooks -->
 <!-- TODO Optimize/limit and clean up inputs and their legths -->
 <!-- TODO Add 1.e + x when number is too big for limited input -->
+<!-- TODO Optimize stylesheets with a more extensive global config with variables -->
 <template>
   <div v-if="!isHistoryMode" class="calculator-calculations" @keydown="onKeyboardInput">
     <input
@@ -324,6 +330,7 @@ watch(inputData, (value) => {
   justify-content: flex-end;
   line-height: 1;
   width: 100%;
+  flex-wrap: wrap;
 }
 
 .calculator-action {
@@ -340,9 +347,8 @@ watch(inputData, (value) => {
   flex-shrink: 1;
   font-size: inherit;
   height: 3.125rem;
-  max-width: 140px;
+  max-width: 300px;
   width: 100%;
-  width: min-content;
 }
 
 .calculator-input:focus {

@@ -1,3 +1,4 @@
+import { MAX_INPUT_LENGTH } from './constants'
 import type { HistoryItem } from './History.vue'
 import type { CalculatorActions } from './ResultAndAction.vue'
 
@@ -108,10 +109,14 @@ export const calculateResult = (
     case '^':
       const cleanedNumber = Math.floor(value1Number * Math.pow(10, decimalPointValue1))
 
-      return (
+      const powResult =
         Math.pow(cleanedNumber, value2Number) /
         Math.pow(Math.pow(10, decimalPointValue1), value2Number)
-      )
+
+      // const cleanedPowResult =
+      //   powResult.toString().length > MAX_INPUT_LENGTH ? powResult.toExponential() : powResult
+
+      return powResult
     case '/':
       const divValue1 = Math.floor(value1Number * decimalPointModifier)
       const divValue2 = Math.floor(value2Number * decimalPointModifier)
@@ -154,19 +159,28 @@ export const calculateInputWidth = (inputValue?: string) => {
   return `${width}ch`
 }
 
-export const shouldIgnoreButtonInput = (
-  key: string,
-  currentValue: string,
+export const shouldIgnoreButtonInput = ({
+  key,
+  currentValue,
+  result
+}: {
+  key: string
+  currentValue: string
   result: number | null
-) => {
+}) => {
+  const isNumber = !isNaN(parseInt(key))
+
   const isTryingToEnterMultipleLeadingZeros = key === '0' && result === null && currentValue === '0'
   const isTryingToEnterMultipleDecimalPoints =
     key === '.' && result === null && currentValue?.includes('.')
   const isTryngToCalculateAFinishedCalculation = key === '=' && result !== null
+  const isTryingToExceedMaximumLength =
+    currentValue.length >= MAX_INPUT_LENGTH && (isNumber || key === '.')
 
   return (
     isTryingToEnterMultipleLeadingZeros ||
     isTryingToEnterMultipleDecimalPoints ||
-    isTryngToCalculateAFinishedCalculation
+    isTryngToCalculateAFinishedCalculation ||
+    isTryingToExceedMaximumLength
   )
 }
