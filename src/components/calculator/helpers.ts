@@ -115,9 +115,6 @@ export const calculateResult = (
         Math.pow(cleanedNumber, value2Number) /
         Math.pow(Math.pow(10, decimalPointValue1), value2Number)
 
-      // const cleanedPowResult =
-      //   powResult.toString().length > MAX_INPUT_LENGTH ? powResult.toExponential() : powResult
-
       result = powResult
 
       break
@@ -161,7 +158,11 @@ export const calculateResult = (
       result = 0
   }
 
-  return result !== undefined ? result.toString() : result
+  const exceedsMaxLength = result?.toString().length > MAX_INPUT_LENGTH
+
+  return result !== undefined && exceedsMaxLength
+    ? result.toPrecision(MAX_INPUT_LENGTH - 5)
+    : result?.toString()
 }
 
 export const calculateInputWidth = (inputValue?: string) => {

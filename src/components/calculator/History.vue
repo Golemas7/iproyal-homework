@@ -101,7 +101,10 @@ const sortedItems = computed(() => {
           class="history-entry history-entry--calculation"
           @click="handleButtonClick(historyItem)"
         >
-          {{ `${historyItem.value1} ${historyItem.action} ${historyItem.value2}` }}
+          <span>{{ historyItem.value1 }}</span>
+          <span>&nbsp;{{ historyItem.action }}&nbsp;</span>
+          <span>{{ historyItem.value2 }}</span>
+          <!-- {{ `${historyItem.value1} ${historyItem.action} ${historyItem.value2}` }} -->
         </Button>
         <Button as-icon class="history-entry" @click="handleButtonClick(historyItem, true)">
           {{ `=  ${historyItem.result}` }}
@@ -151,6 +154,10 @@ const sortedItems = computed(() => {
 
   .history-entry--calculation {
     font-size: 1.5rem;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    height: auto;
   }
 }
 

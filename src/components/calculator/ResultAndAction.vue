@@ -76,7 +76,7 @@ watch(width, (value) => {
         <History />
 
         <template v-if="!isHistoryMode">
-          <div v-if="resultAndAction.result !== null" class="result">
+          <div v-if="resultAndAction.result !== ''" class="result">
             <span class="result-symbol">=</span>
             <span class="result-value">{{ resultAndAction.result }}</span>
           </div>
