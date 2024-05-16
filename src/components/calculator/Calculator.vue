@@ -287,8 +287,6 @@ watch(inputData, (value) => {
 })
 </script>
 
-<!-- TODO Fix import with wrong files or wrong format files -->
-<!-- TODO Update readme file -->
 <!-- TODO Add git hooks -->
 <!-- TODO Optimize stylesheets with a more extensive global config with variables -->
 <template>
