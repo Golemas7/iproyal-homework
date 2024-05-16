@@ -1,19 +1,20 @@
 <script setup lang="ts">
 import { provide, ref, watch } from 'vue'
 
-import History from './History.vue'
 import Button from '@/components/Button.vue'
 import { useWindowSize } from '@/utils/window'
-
-export type ResultAndAction = {
-  action: CalculatorActions | ''
-  result: string
-  onButtonClick: (e: CalculatorButton) => void
-}
+import History from './History.vue'
 
 export type CalculatorActions = 'C' | '^' | '↹' | '/' | 'X' | '-' | '+' | '='
 export type CalculatorNumbers = '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9'
 export type CalculatorButton = CalculatorActions | CalculatorNumbers | '.'
+
+export type ResultAndAction = {
+  action: CalculatorActions | ''
+  result: string
+  // eslint-disable-next-line no-unused-vars
+  onButtonClick: (e: CalculatorButton) => void
+}
 
 const buttons: CalculatorButton[][] = [
   ['C', '^', '↹', '/'],
@@ -39,7 +40,7 @@ const numberButtons = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
 const resultAndAction = ref<ResultAndAction>({
   action: '',
   result: '',
-  onButtonClick: (e: CalculatorButton) => {}
+  onButtonClick: () => {}
 })
 const isHistoryMode = ref(false)
 
@@ -84,7 +85,7 @@ watch(width, (value) => {
       </div>
       <div v-if="!isHistoryMode" class="buttons-container">
         <template v-for="buttonsRow in isTablet ? buttons : buttonsMobile">
-          <template v-for="button in buttonsRow">
+          <template :key="button" v-for="button in buttonsRow">
             <Button
               :type="numberButtons.includes(button) ? 'Secondary' : 'Primary'"
               class="calculator-button"

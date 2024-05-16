@@ -28,3 +28,5 @@ export function useWindowSize() {
 
   return { width, height }
 }
+
+export default useWindowSize

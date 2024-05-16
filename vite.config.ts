@@ -12,6 +12,7 @@ export default defineConfig({
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
       '/^components(?:(/[w-/]+))?/': 'src/components/$1'
-    }
+    },
+    extensions: ['.ts']
   }
 })

@@ -8,8 +8,23 @@ module.exports = {
     'eslint:recommended',
     '@vue/eslint-config-typescript',
     '@vue/eslint-config-prettier/skip-formatting',
-    'airbnb'
+    'airbnb',
+    'prettier'
   ],
+  rules: {
+    'vue/multi-word-component-names': 'off',
+    'import/extensions': [
+      'error',
+      'ignorePackages',
+      {
+        js: 'never',
+        mjs: 'never',
+        jsx: 'never',
+        ts: 'never',
+        tsx: 'never'
+      }
+    ]
+  },
   overrides: [
     {
       files: ['cypress/e2e/**/*.{cy,spec}.{js,ts,jsx,tsx}', 'cypress/support/**/*.{js,ts,jsx,tsx}'],
@@ -18,5 +33,11 @@ module.exports = {
   ],
   parserOptions: {
     ecmaVersion: 'latest'
-  }
+  },
+  settings: {
+    'import/resolver': {
+      typescript: {}
+    }
+  },
+  ignorePatterns: ['*.config/*']
 }

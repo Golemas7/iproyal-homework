@@ -93,12 +93,12 @@ const handleButtonClick = (buttonValue: CalculatorButton) => {
 
   restartCalculationWithResultValue(buttonValue)
 
-  const isANumber = !isNaN(parseInt(buttonValue))
+  const isANumber = !Number.isNaN(parseInt(buttonValue, 10))
 
   if (isANumber || buttonValue === '.') {
     if (inputData.currentInputActive === 'value1') {
       // If we have 0 and type in a different number, override it
-      let newValue =
+      const newValue =
         inputData.value1 === '0' && buttonValue !== '.'
           ? buttonValue
           : insertTextAtCursor(input1?.value, buttonValue)
@@ -141,7 +141,6 @@ const handleButtonClick = (buttonValue: CalculatorButton) => {
     resultAndAction.result = newValue ?? ''
 
     // Create history entry
-
     const newHistoryItem = {
       value1: inputData.value1 || '0',
       action: resultAndAction.action as CalculatorActions,
@@ -218,7 +217,7 @@ const onKeyboardInput = (e: KeyboardEvent) => {
 
 // Filter out what gets through to the input
 const onIputKeyDown = (e: KeyboardEvent, currentValue = '') => {
-  const isANumber = !isNaN(parseInt(e.key))
+  const isANumber = !Number.isNaN(parseInt(e.key, 10))
   const ignoreButton = shouldIgnoreButtonInput({
     key: e.key,
     currentValue,

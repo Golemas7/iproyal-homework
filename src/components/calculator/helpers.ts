@@ -9,7 +9,7 @@ export const parseCsvStringToHistoryItems = (csvString: string): HistoryItem[] =
 
   const items: HistoryItem[] = csvString
     .split('\n')
-    .map((historyItemString, index) => {
+    .map((historyItemString, index): HistoryItem | undefined => {
       // The first item is the column names
       if (index === 0) {
         return
@@ -24,8 +24,11 @@ export const parseCsvStringToHistoryItems = (csvString: string): HistoryItem[] =
       }
 
       const invalidValues =
-        isNaN(parseFloat(value1)) || isNaN(parseFloat(value2)) || isNaN(parseFloat(result))
+        Number.isNaN(parseFloat(value1)) ||
+        Number.isNaN(parseFloat(value2)) ||
+        Number.isNaN(parseFloat(result))
       const invalidDate = new Date(timeStamp).toString() === 'Invalid Date'
+      // eslint-disable-next-line no-useless-escape
       const invalidAction = !/^[\^\/Xx\-+]+$/.test(action)
 
       const hasInvalidValues = invalidValues || invalidDate || invalidAction
@@ -42,6 +45,7 @@ export const parseCsvStringToHistoryItems = (csvString: string): HistoryItem[] =
         timeStamp: new Date(timeStamp)
       }
 
+      // eslint-disable-next-line consistent-return
       return historyItem
     })
     .filter(
@@ -63,15 +67,14 @@ export const parseDataIntoCsvFormat = (data: HistoryItem[], headerString = ''): 
 
     const dataRow = `${value1},${action},${value2},${result},${timeStamp.toString()}`
 
-    return builtString + dataRow + '\n'
+    return `${builtString + dataRow}\n`
   }, headerString)
 
   return finalString
 }
 
-export const parseNumberValueFromString = (value: string): number => {
-  return value.includes('.') ? parseFloat(value) : parseInt(value)
-}
+export const parseNumberValueFromString = (value: string): number =>
+  value.includes('.') ? parseFloat(value) : parseInt(value, 10)
 
 export const insertTextAtCursor = (
   element?: HTMLInputElement | null,
@@ -86,11 +89,11 @@ export const insertTextAtCursor = (
   element.focus()
 
   // Get the current selection range in the input element
-  let start = element?.selectionStart
-  let end = element?.selectionEnd
+  const start = element?.selectionStart
+  const end = element?.selectionEnd
 
   // Determine the new cursor position
-  let newPos = (isBefore ? start : end) ?? 0
+  const newPos = (isBefore ? start : end) ?? 0
 
   // Insert the text at the current selection
   element?.setRangeText(text, newPos, newPos, 'end')
@@ -116,22 +119,21 @@ export const calculateResult = (
 
   const decimalPointOffset =
     decimalPointValue1 > decimalPointValue2 ? decimalPointValue1 : decimalPointValue2
-  const decimalPointModifier = Math.pow(10, decimalPointOffset)
+  const decimalPointModifier = 10 ** decimalPointOffset
 
   let result: string | number | undefined
 
   switch (action) {
-    case '^':
-      const cleanedNumber = Math.floor(value1Number * Math.pow(10, decimalPointValue1))
+    case '^': {
+      const cleanedNumber = Math.floor(value1Number * 10 ** decimalPointValue1)
 
-      const powResult =
-        Math.pow(cleanedNumber, value2Number) /
-        Math.pow(Math.pow(10, decimalPointValue1), value2Number)
+      const powResult = cleanedNumber ** value2Number / (10 ** decimalPointValue1) ** value2Number
 
       result = powResult
 
       break
-    case '/':
+    }
+    case '/': {
       const divValue1 = Math.floor(value1Number * decimalPointModifier)
       const divValue2 = Math.floor(value2Number * decimalPointModifier)
 
@@ -140,16 +142,18 @@ export const calculateResult = (
       result = divResult
 
       break
-    case 'X':
+    }
+    case 'X': {
       const mulValue1 = Math.floor(value1Number * decimalPointModifier)
       const mulValue2 = Math.floor(value2Number * decimalPointModifier)
 
-      const mulResult = (mulValue1 * mulValue2) / Math.pow(decimalPointModifier, 2)
+      const mulResult = (mulValue1 * mulValue2) / decimalPointModifier ** 2
 
       result = mulResult
 
       break
-    case '+':
+    }
+    case '+': {
       const addValue1 = Math.floor(value1Number * decimalPointModifier)
       const addValue2 = Math.floor(value2Number * decimalPointModifier)
 
@@ -158,7 +162,8 @@ export const calculateResult = (
       result = addResult
 
       break
-    case '-':
+    }
+    case '-': {
       const subValue1 = Math.floor(value1Number * decimalPointModifier)
       const subValue2 = Math.floor(value2Number * decimalPointModifier)
 
@@ -167,6 +172,7 @@ export const calculateResult = (
       result = subResult
 
       break
+    }
     default:
       result = 0
   }
@@ -204,7 +210,7 @@ export const shouldIgnoreButtonInput = ({
   currentValue: string
   result: string
 }) => {
-  const isNumber = !isNaN(parseInt(key))
+  const isNumber = !Number.isNaN(parseInt(key, 10))
 
   const isTryingToEnterMultipleLeadingZeros = key === '0' && result === '' && currentValue === '0'
   const isTryingToEnterMultipleDecimalPoints =

@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { computed, inject, provide, ref, watch, type Ref } from 'vue'
 import { saveToFile, readFileData } from '@/utils/file'
-import Calculator from './Calculator.vue'
 import Button from '@/components/Button.vue'
+import Calculator from './Calculator.vue'
 import { parseCsvStringToHistoryItems, parseDataIntoCsvFormat } from './helpers'
 
 export type HistoryItem = {
@@ -15,7 +15,9 @@ export type HistoryItem = {
 
 export type History = {
   items: HistoryItem[]
+  // eslint-disable-next-line no-unused-vars
   setCurrentCalculationToEntry: (entry: HistoryItem) => void
+  // eslint-disable-next-line no-unused-vars
   setCurrentCalculationToResult: (entry: HistoryItem) => void
 }
 
@@ -25,13 +27,29 @@ const input = ref<HTMLInputElement | null>(null)
 const importData = ref<string>('')
 const history = ref<History>({
   items: [],
-  setCurrentCalculationToEntry: (e: HistoryItem) => {},
-  setCurrentCalculationToResult: (e: HistoryItem) => {}
+  setCurrentCalculationToEntry: () => {},
+  setCurrentCalculationToResult: () => {}
 })
 
 provide('history', history)
 
 const isHistoryMode = inject<Ref<Boolean>>('isHistoryMode') as Ref<Boolean>
+
+const sortedItems = computed(() => {
+  const unsortedItems = [...history.value.items]
+
+  let sortedItemsArray = unsortedItems
+
+  sortedItemsArray = unsortedItems.sort((a, b) => +b.timeStamp - +a.timeStamp)
+
+  if (!isHistoryMode.value) {
+    const itemsLength = sortedItemsArray.length
+
+    // Get the last 2 items
+    sortedItemsArray = sortedItemsArray.reverse().slice(itemsLength - 2)
+  }
+  return [...sortedItemsArray]
+})
 
 const onHistoryExport = () => {
   const headerRowString = 'value 1,action,value 2,result,timestamp\n'
@@ -66,7 +84,7 @@ const handleButtonClick = (historyItem: HistoryItem, isResult?: boolean) => {
 }
 
 watch(importData, (data) => {
-  if (!!data) {
+  if (data) {
     const importedHistoryItems = parseCsvStringToHistoryItems(data)
 
     // Merge with current history items
@@ -76,28 +94,16 @@ watch(importData, (data) => {
     history.value.items = combinedHistoryItems
   }
 })
-
-const sortedItems = computed(() => {
-  const unsortedItems = [...history.value.items]
-
-  let sortedItemsArray = unsortedItems
-
-  sortedItemsArray = unsortedItems.sort((a, b) => +b.timeStamp - +a.timeStamp)
-
-  if (!isHistoryMode.value) {
-    const itemsLength = sortedItemsArray.length
-
-    // Get the last 2 items
-    sortedItemsArray = sortedItemsArray.reverse().slice(itemsLength - 2)
-  }
-  return [...sortedItemsArray]
-})
 </script>
 
 <template>
   <div class="history" :class="{ 'history--history-mode': isHistoryMode }">
     <template v-if="sortedItems?.length > 0">
-      <div v-for="historyItem in sortedItems" class="history-entry-container">
+      <div
+        :key="historyItem.timeStamp.toString()"
+        v-for="historyItem in sortedItems"
+        class="history-entry-container"
+      >
         <Button
           as-icon
           class="history-entry history-entry--calculation"
