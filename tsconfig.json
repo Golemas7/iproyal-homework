@@ -1,21 +1,11 @@
 {
-  // "files": [],
-  "references": [
-    // {
-    //   "path": "./tsconfig.node.json"
-    // },
-    // {
-    //   "path": "./tsconfig.app.json"
-    // },
-    // {
-    //   "path": "./tsconfig.vitest.json"
-    // }
-  ],
+  "references": [],
   "compilerOptions": {
     "target": "esnext",
-    "module": "esnext",
-    "moduleResolution": "node",
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
     "lib": ["esnext", "dom"],
+    "types": ["vite/client"],
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
