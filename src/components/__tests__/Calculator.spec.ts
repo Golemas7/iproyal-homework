@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from 'vitest'
 
 import { shallowMount } from '@vue/test-utils'
 import { ref } from 'vue'
-import Calculator from '../calculator'
+import Calculator from '@/components/calculator'
 
 // Mock implementation
 vi.mock('vue', async () => {
