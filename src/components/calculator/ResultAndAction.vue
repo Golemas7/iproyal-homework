@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { provide, ref, watch } from 'vue'
 
-import Button from '@/components/Button.vue'
+import Button from '@components/Button.vue'
 import { useWindowSize } from '@/utils/window'
 import History from './History.vue'
 import Help from './Help.vue'
@@ -161,14 +161,11 @@ watch(width, (value) => {
 }
 
 .result {
+  color: white;
   font-size: 1.875rem;
 
   .result-symbol {
     padding-right: 1rem;
-  }
-
-  .result-value {
-    color: white;
   }
 }
 

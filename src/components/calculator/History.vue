@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, inject, provide, ref, watch, type Ref } from 'vue'
-import { saveToFile, readFileData } from '@/utils/file'
-import Button from '@/components/Button.vue'
+import { saveToFile, readFileData } from '@utils/file'
+import Button from '@components/Button.vue'
 import Calculator from './Calculator.vue'
 import { parseCsvStringToHistoryItems, parseDataIntoCsvFormat } from './helpers'
 
@@ -118,7 +118,7 @@ watch(importData, (data) => {
         </Button>
       </div>
     </template>
-    <span v-else-if="isHistoryMode">No history found</span>
+    <span v-else-if="isHistoryMode" class="no-history">No history found</span>
   </div>
   <div v-if="isHistoryMode" class="history-actions">
     <Button class="history-action" @click="onHistoryImport">Import</Button>
@@ -154,6 +154,7 @@ watch(importData, (data) => {
   justify-content: flex-start;
   overflow-y: auto;
   padding-right: 4px;
+  color: white;
 
   .history-entry {
     color: white;
