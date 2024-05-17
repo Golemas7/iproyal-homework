@@ -112,7 +112,6 @@ watch(importData, (data) => {
           <span>{{ historyItem.value1 }}</span>
           <span>&nbsp;{{ historyItem.action }}&nbsp;</span>
           <span>{{ historyItem.value2 }}</span>
-          <!-- {{ `${historyItem.value1} ${historyItem.action} ${historyItem.value2}` }} -->
         </Button>
         <Button as-icon class="history-entry" @click="handleButtonClick(historyItem, true)">
           {{ `=  ${historyItem.result}` }}
