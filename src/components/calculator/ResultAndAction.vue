@@ -4,7 +4,6 @@ import { provide, ref, watch } from 'vue'
 import Button from '@components/Button.vue'
 import { useWindowSize } from '@/utils/window'
 import History from './History.vue'
-import Help from './Help.vue'
 
 export type CalculatorActions = 'C' | '^' | '↹' | '/' | 'x' | '-' | '+' | '='
 export type CalculatorNumbers = '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9'
@@ -64,7 +63,6 @@ watch(width, (value) => {
 <template>
   <div class="calculator">
     <div class="calculator-inner-container">
-      <Help />
       <div class="calculator-header">
         <Button as-icon @click="isHistoryMode = false">
           <h1 v-if="!isHistoryMode" class="title title--active">Calculator</h1>
