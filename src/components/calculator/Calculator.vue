@@ -21,6 +21,8 @@ type InputData = {
   currentInputActive: InputType
 }
 
+const actions = ['^', '/', 'x', '-', '+']
+
 const { value: inputData } = ref<InputData>({
   value1: '',
   value2: '',
@@ -205,8 +207,8 @@ const onKeyboardInput = (e: KeyboardEvent) => {
 
     if (key === 'TAB') {
       validKey = '↹'
-    } else if (key === '*') {
-      validKey = 'X'
+    } else if (key === '*' || key === 'X') {
+      validKey = 'x'
     } else if (key === 'ENTER') {
       validKey = '='
     }
@@ -305,7 +307,7 @@ onBeforeUnmount(() => {
 
 <template>
   <div v-if="!isHistoryMode" class="calculator-calculations" @keydown="onKeyboardInput">
-    <label class="sr-only" for="value1">First number of the equasion</label>
+    <label class="sr-only" for="value1">First number of the calculation</label>
     <input
       id="value1"
       ref="input1"
@@ -319,8 +321,12 @@ onBeforeUnmount(() => {
       @blur="(e) => onInputBlur(e, 'value1')"
       @click="onFocusChanged('value1')"
     />
-    <span class="calculator-action">{{ resultAndAction.action.toLocaleLowerCase() || '_' }}</span>
-    <label class="sr-only" for="value2">Second number of the equasion</label>
+    <label class="sr-only" for="action">The operation of the calculation</label>
+    <select v-model="resultAndAction.action" id="action" class="calculator-select" placeholder="_">
+      <option value="" disabled selected hidden>_</option>
+      <option :key="action" v-for="action in actions" :value="action">{{ action }}</option>
+    </select>
+    <label class="sr-only" for="value2">Second number of the calculation</label>
     <input
       id="value2"
       ref="input2"
@@ -347,22 +353,32 @@ onBeforeUnmount(() => {
   width: 100%;
 }
 
-.calculator-action {
-  color: inherit;
-  min-width: 40px;
-  text-align: center;
-}
-
-.calculator-input {
+.calculator-input,
+.calculator-select {
   background: transparent;
   border: none;
   color: inherit;
+}
+
+.calculator-input {
   display: inline-block;
   flex-shrink: 1;
-  font-size: inherit;
   height: 3.125rem;
   max-width: 300px;
+  font-size: inherit;
   width: 100%;
+}
+
+.calculator-select {
+  /* for Firefox */
+  -moz-appearance: none;
+  /* for Chrome */
+  -webkit-appearance: none;
+
+  font-size: 2.2rem;
+  cursor: pointer;
+  min-width: 40px;
+  text-align: center;
 }
 
 .calculator-input:focus {

@@ -143,7 +143,7 @@ export const calculateResult = (
 
       break
     }
-    case 'X': {
+    case 'x': {
       const mulValue1 = Math.floor(value1Number * decimalPointModifier)
       const mulValue2 = Math.floor(value2Number * decimalPointModifier)
 
@@ -188,14 +188,19 @@ export const calculateInputWidth = (inputValue?: string) => {
   let width = 1.2
 
   const floatNumberSize = 0.3
+  const negativeNumberSignSize = 0.3
   const characterSize = 1.2
 
   const hasFloatCharacter = inputValue?.includes('.')
   const floatCharacterModifyer = hasFloatCharacter ? 1 : 0
+  const hasNegativeNumberSign = inputValue.includes('-')
+  const negativeNumberSignModifyer = hasNegativeNumberSign ? 1 : 0
 
   if (inputValue?.length && inputValue?.length > 0) {
     width =
-      inputValue.replace('.', '').length * characterSize + floatCharacterModifyer * floatNumberSize
+      inputValue.replace(/[.-]/g, '').length * characterSize +
+      floatCharacterModifyer * floatNumberSize +
+      negativeNumberSignModifyer * negativeNumberSignSize
   }
 
   return `${width}ch`

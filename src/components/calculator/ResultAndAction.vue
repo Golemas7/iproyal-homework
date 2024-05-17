@@ -5,7 +5,7 @@ import Button from '@/components/Button.vue'
 import { useWindowSize } from '@/utils/window'
 import History from './History.vue'
 
-export type CalculatorActions = 'C' | '^' | '↹' | '/' | 'X' | '-' | '+' | '='
+export type CalculatorActions = 'C' | '^' | '↹' | '/' | 'x' | '-' | '+' | '='
 export type CalculatorNumbers = '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9'
 export type CalculatorButton = CalculatorActions | CalculatorNumbers | '.'
 
@@ -18,7 +18,7 @@ export type ResultAndAction = {
 
 const buttons: CalculatorButton[][] = [
   ['C', '^', '↹', '/'],
-  ['7', '8', '9', 'X'],
+  ['7', '8', '9', 'x'],
   ['4', '5', '6', '-'],
   ['1', '2', '3', '+'],
   ['0', '.', '=']
@@ -26,7 +26,7 @@ const buttons: CalculatorButton[][] = [
 
 const buttonsMobile: CalculatorButton[][] = [
   ['C', '^', '/'],
-  ['X', '-', '+'],
+  ['x', '-', '+'],
   ['7', '8', '9'],
   ['4', '5', '6'],
   ['1', '2', '3'],
