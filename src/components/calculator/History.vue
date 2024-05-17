@@ -52,6 +52,11 @@ const sortedItems = computed(() => {
 })
 
 const onHistoryExport = () => {
+  // If we have no history, do not export
+  if (!sortedItems.value || sortedItems.value.length === 0) {
+    return
+  }
+
   const headerRowString = 'value 1,action,value 2,result,timestamp\n'
 
   const data = parseDataIntoCsvFormat(sortedItems.value, headerRowString)
