@@ -302,10 +302,11 @@ onBeforeUnmount(() => {
 })
 </script>
 
-<!-- TODO Optimize stylesheets with a more extensive global config with variables -->
 <template>
   <div v-if="!isHistoryMode" class="calculator-calculations" @keydown="onKeyboardInput">
+    <label class="sr-only" for="value1"></label>
     <input
+      id="value1"
       ref="input1"
       autofocus
       :style="{ width: input1Width }"

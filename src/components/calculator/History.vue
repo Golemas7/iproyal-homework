@@ -127,7 +127,7 @@ watch(importData, (data) => {
     <input
       ref="input"
       tabindex="-1"
-      class="history-action--hidden"
+      class="sr-only"
       type="file"
       :accept="allowedExtensions"
       @change="onFileAttached($event)"
@@ -197,17 +197,6 @@ watch(importData, (data) => {
 
   .history-action {
     padding: 12px 16px;
-  }
-
-  /* As per https://www.a11yproject.com/posts/how-to-hide-content/ */
-  .history-action--hidden {
-    clip-path: inset(50%);
-    clip: rect(0 0 0 0);
-    height: 1px;
-    overflow: hidden;
-    position: absolute;
-    white-space: nowrap;
-    width: 1px;
   }
 }
 
