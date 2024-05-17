@@ -1,3 +1,3 @@
-import Calculator from './Calculator.vue'
+import Calculator from './ResultAndAction.vue'
 
 export default Calculator

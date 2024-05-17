@@ -320,11 +320,11 @@ watch(inputData, (value) => {
 .calculator-calculations {
   color: #9e9c9c;
   display: flex;
+  flex-wrap: wrap;
   font-size: 2.5rem;
   justify-content: flex-end;
   line-height: 1;
   width: 100%;
-  flex-wrap: wrap;
 }
 
 .calculator-action {

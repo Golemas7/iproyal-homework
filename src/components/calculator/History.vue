@@ -151,49 +151,49 @@ watch(importData, (data) => {
 }
 
 .history--history-mode {
-  overflow-y: auto;
-  padding-right: 4px;
   gap: 24px;
   justify-content: flex-start;
+  overflow-y: auto;
+  padding-right: 4px;
 
   .history-entry {
     color: white;
   }
 
   .history-entry--calculation {
-    font-size: 1.5rem;
     display: flex;
     flex-wrap: wrap;
-    justify-content: flex-end;
+    font-size: 1.5rem;
     height: auto;
+    justify-content: flex-end;
   }
 }
 
 .history-entry-container {
+  align-items: flex-end;
   display: flex;
   flex-direction: column;
-  align-items: flex-end;
 }
 
 .history-entry {
-  cursor: pointer;
   background: transparent;
-  font-size: 1.2rem;
-  color: #6b6a6a;
-  height: 2rem;
   border: 0;
+  color: #6b6a6a;
+  cursor: pointer;
+  font-size: 1.2rem;
+  height: 2rem;
 }
 
 .history-actions {
-  position: absolute;
   bottom: -310px;
-  flex-direction: column;
   display: flex;
-  justify-content: space-between;
-  width: 100%;
-  right: 0;
+  flex-direction: column;
   font-size: 1.563rem;
   gap: 24px;
+  justify-content: space-between;
+  position: absolute;
+  right: 0;
+  width: 100%;
 
   .history-action {
     padding: 12px 16px;
@@ -201,8 +201,8 @@ watch(importData, (data) => {
 
   /* As per https://www.a11yproject.com/posts/how-to-hide-content/ */
   .history-action--hidden {
-    clip: rect(0 0 0 0);
     clip-path: inset(50%);
+    clip: rect(0 0 0 0);
     height: 1px;
     overflow: hidden;
     position: absolute;
@@ -213,8 +213,8 @@ watch(importData, (data) => {
 
 @media screen and (min-width: 768px) {
   .history-actions {
-    flex-direction: row;
     bottom: -80px;
+    flex-direction: row;
   }
 }
 </style>

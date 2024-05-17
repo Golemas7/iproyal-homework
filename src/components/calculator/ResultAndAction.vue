@@ -145,12 +145,12 @@ watch(width, (value) => {
   flex-direction: column;
   height: 300px;
   justify-content: flex-end;
+  margin: 0 auto 40px;
+  max-width: 300px;
   overflow: visible;
   padding: 30px;
-  width: 100%;
-  max-width: 300px;
-  margin: 0 auto 40px;
   position: relative;
+  width: 100%;
 }
 
 .screen--history-mode {
