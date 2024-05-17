@@ -246,6 +246,15 @@ const onIputKeyDown = (e: KeyboardEvent, currentValue = '') => {
   }
 }
 
+// Focus input when entering using a keyboard to prevent user not typing anything in case of lost focus
+const focusInput = () => {
+  if (inputData.currentInputActive === 'value1') {
+    input1.value.focus()
+  } else {
+    input2.value.focus()
+  }
+}
+
 // Set the method references to apropriate methods
 resultAndAction.onButtonClick = handleButtonClick
 history.setCurrentCalculationToEntry = handleHistoryEntryClick
@@ -284,14 +293,6 @@ watch(inputData, (value) => {
   input1Width.value = calculateInputWidth(value1)
   input2Width.value = calculateInputWidth(value2)
 })
-
-const focusInput = () => {
-  if (inputData.currentInputActive === 'value1') {
-    input1.value.focus()
-  } else {
-    input2.value.focus()
-  }
-}
 
 onMounted(() => {
   window.addEventListener('keydown', focusInput)
