@@ -4,6 +4,7 @@ import { provide, ref, watch } from 'vue'
 import Button from '@components/Button.vue'
 import { useWindowSize } from '@/utils/window'
 import History from './History.vue'
+import { getButton } from './helpers'
 
 export type CalculatorActions = 'C' | '^' | '↹' | '/' | 'x' | '-' | '+' | '='
 export type CalculatorNumbers = '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9'
@@ -25,6 +26,10 @@ const buttons: CalculatorButton[][] = [
   ['0', '.', '=']
 ]
 
+const calculatorButtons = buttons.map((buttonArray) =>
+  buttonArray.map((button) => getButton(button))
+)
+
 const buttonsMobile: CalculatorButton[][] = [
   ['C', '^', '/'],
   ['x', '-', '+'],
@@ -34,6 +39,10 @@ const buttonsMobile: CalculatorButton[][] = [
   ['0', '.', '↹'],
   ['=']
 ]
+
+const calculatorMobileButtons = buttonsMobile.map((buttonArray) =>
+  buttonArray.map((button) => getButton(button))
+)
 
 // Could just do a check of !isNaN(parseInt(value)) instead
 const numberButtons = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
@@ -85,9 +94,10 @@ watch(width, (value) => {
         </template>
       </div>
       <div v-if="!isHistoryMode" class="buttons-container">
-        <template v-for="buttonsRow in isTablet ? buttons : buttonsMobile">
-          <template :key="button" v-for="button in buttonsRow">
+        <template v-for="buttonsRow in isTablet ? calculatorButtons : calculatorMobileButtons">
+          <template :key="button" v-for="{ value: button, title } in buttonsRow">
             <Button
+              :title="title"
               :type="numberButtons.includes(button) ? 'Secondary' : 'Primary'"
               class="calculator-button"
               @click="handleButtonClick(button)"

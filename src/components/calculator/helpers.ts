@@ -1,6 +1,6 @@
 import { MAX_INPUT_LENGTH } from './constants'
 import type { HistoryItem } from './History.vue'
-import type { CalculatorActions } from './ResultAndAction.vue'
+import type { CalculatorActions, CalculatorButton } from './ResultAndAction.vue'
 
 export const parseCsvStringToHistoryItems = (csvString: string): HistoryItem[] => {
   if (!csvString) {
@@ -230,4 +230,53 @@ export const shouldIgnoreButtonInput = ({
     isTryngToCalculateAFinishedCalculation ||
     isTryingToExceedMaximumLength
   )
+}
+
+export const getButton = (buttonKey: CalculatorButton) => {
+  let title = ''
+
+  // eslint-disable-next-line default-case
+  switch (buttonKey) {
+    case 'C':
+      title = 'Clear current calculation'
+
+      break
+    case '^':
+      title = '... to the power of ...'
+
+      break
+    case '↹':
+      title = 'Switch which number are you typing'
+
+      break
+    case '/':
+      title = '... divided by ...'
+
+      break
+    case 'x':
+      title = '... times ...'
+
+      break
+    case '-':
+      title = '... minus ...'
+
+      break
+    case '+':
+      title = '... plus ...'
+
+      break
+    case '=':
+      title = 'Calculate result'
+
+      break
+    case '.':
+      title = 'Insert floating point'
+
+      break
+  }
+
+  return {
+    title,
+    value: buttonKey
+  }
 }
