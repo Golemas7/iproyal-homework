@@ -43,6 +43,30 @@ const { value: resultAndAction } = inject<Ref<ResultAndAction>>(
 const { value: history } = inject<Ref<History>>('history') as Ref<History>
 const isHistoryMode = inject<Ref<Boolean>>('isHistoryMode') as Ref<Boolean>
 
+// Clear the result if a previous calculation has just finished and we start typing
+// Start a new calculcation with the result as a starting point
+const restartCalculationWithResultValue = (buttonValue: CalculatorButton) => {
+  if (buttonValue !== '=' && resultAndAction.result !== '') {
+    inputData.value1 = resultAndAction.result
+    inputData.value2 = ''
+    resultAndAction.result = ''
+  }
+}
+
+// Focus input when entering using a keyboard to prevent user not typing anything in case of lost focus
+const focusInput = (e: KeyboardEvent) => {
+  if (e.key === 'Tab' || e.key === 'Shift' || e.key === 'Enter') {
+    return
+  }
+
+  if (inputData.currentInputActive === 'value1') {
+    input1.value.focus()
+  } else {
+    input2.value.focus()
+  }
+}
+
+// Handle history clicks
 const handleHistoryClick = (historyItem: HistoryItem, handleResultClick?: boolean) => {
   const { value1, action, value2, result } = historyItem
 
@@ -68,16 +92,6 @@ const handleHistoryEntryClick = (historyItem: HistoryItem) => {
 
 const handleHistoryResultClick = (historyItem: HistoryItem) => {
   handleHistoryClick(historyItem, true)
-}
-
-// Clear the result if a previous calculation has just finished and we start typing
-// Start a new calculcation with the result as a starting point
-const restartCalculationWithResultValue = (buttonValue: CalculatorButton) => {
-  if (buttonValue !== '=' && resultAndAction.result !== '') {
-    inputData.value1 = resultAndAction.result
-    inputData.value2 = ''
-    resultAndAction.result = ''
-  }
 }
 
 // Handle calculator button click OR an action click from keyboard
@@ -174,25 +188,7 @@ const handleButtonClick = (buttonValue: CalculatorButton) => {
   }
 }
 
-// TODO HANDLE ACCESSIBILITY CASES
-// Instead of holding the users focus, we could just use the active variable to add to value
-// const onInputBlur = (e: Event, valueName: InputType) => {
-//   // We set a timeout, so click will register first before we start processing if new input was clicked. We need this, because the blur event is fired first.
-//   setTimeout(() => {
-//     if (inputData.currentInputActive === valueName) {
-//       const input = e.target as HTMLInputElement
-
-//       inputData.currentInputActive = valueName
-//       input.focus()
-
-//       // Browser limitation, sometimes we need to wait for blur to finish
-//       setTimeout(() => {
-//         input.focus()
-//       }, 100)
-//     }
-//   }, 100)
-// }
-
+// Toggle active input
 const onFocusChanged = (valueName: InputType) => {
   inputData.currentInputActive = valueName
 }
@@ -254,22 +250,10 @@ const onIputKeyDown = (e: KeyboardEvent, currentValue = '') => {
   }
 }
 
+// Reset the result if we change the action and have a result
 const onActionChanged = () => {
   if (resultAndAction.action && resultAndAction.result) {
     resultAndAction.result = ''
-  }
-}
-
-// Focus input when entering using a keyboard to prevent user not typing anything in case of lost focus
-const focusInput = (e: KeyboardEvent) => {
-  if (e.key === 'Tab' || e.key === 'Shift' || e.key === 'Enter') {
-    return
-  }
-
-  if (inputData.currentInputActive === 'value1') {
-    input1.value.focus()
-  } else {
-    input2.value.focus()
   }
 }
 
@@ -312,6 +296,7 @@ watch(inputData, (value) => {
   input2Width.value = calculateInputWidth(value2)
 })
 
+// Handle keyboard input when calculator inputs are not actively focused
 onMounted(() => {
   window.addEventListener('keydown', focusInput)
 })
