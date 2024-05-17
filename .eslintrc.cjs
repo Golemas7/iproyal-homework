@@ -23,7 +23,8 @@ module.exports = {
         ts: 'never',
         tsx: 'never'
       }
-    ]
+    ],
+    'import/no-extraneous-dependencies': ['error', { devDependencies: true }]
   },
   overrides: [
     {
