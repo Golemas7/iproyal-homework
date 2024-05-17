@@ -154,10 +154,10 @@ watch(importData, (data) => {
   justify-content: flex-start;
   overflow-y: auto;
   padding-right: 4px;
-  color: white;
+  color: var(--color-white);
 
   .history-entry {
-    color: white;
+    color: var(--color-white);
   }
 
   .history-entry--calculation {
@@ -178,7 +178,7 @@ watch(importData, (data) => {
 .history-entry {
   background: transparent;
   border: 0;
-  color: #6b6a6a;
+  color: var(--color-gray-400);
   cursor: pointer;
   font-size: 1.2rem;
   height: 2rem;

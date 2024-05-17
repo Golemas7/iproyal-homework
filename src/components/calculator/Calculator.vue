@@ -349,7 +349,7 @@ onBeforeUnmount(() => {
 
 <style scoped>
 .calculator-calculations {
-  color: #9e9c9c;
+  color: var(--color-gray-600);
   display: flex;
   flex-wrap: wrap;
   font-size: 2.5rem;

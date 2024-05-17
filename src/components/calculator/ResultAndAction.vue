@@ -16,6 +16,7 @@ export type ResultAndAction = {
   onButtonClick: (e: CalculatorButton) => void
 }
 
+// TODO ADD TITLES SO PEOPLE CAN UNDERSTAND BY HOVER WHAT IT DOES
 const buttons: CalculatorButton[][] = [
   ['C', '^', '↹', '/'],
   ['7', '8', '9', 'x'],
@@ -108,7 +109,7 @@ watch(width, (value) => {
 .calculator-inner-container {
   --max-calculator-width: 450px;
 
-  background-color: #414141;
+  background-color: var(--color-gray-250);
   border-radius: 40px;
   height: 1050px;
   margin: 0 auto;
@@ -119,18 +120,18 @@ watch(width, (value) => {
 }
 
 .title {
-  color: white;
+  color: var(--color-white);
   font-size: 1rem;
   padding-bottom: 0.25rem;
 }
 
 .title--active {
-  border-bottom: 1.5px solid white;
+  border-bottom: 1.5px solid var(--color-white);
 }
 
 .calculator-header {
   align-items: center;
-  color: white;
+  color: var(--color-white);
   display: flex;
   gap: 32px;
   justify-content: center;
@@ -141,7 +142,7 @@ watch(width, (value) => {
   align-items: flex-end;
   background-color: #0b0b0b1a;
   border-radius: 20px;
-  box-shadow: 5px 5px 60px 0px rgba(11, 11, 11, 0.1);
+  box-shadow: 5px 5px 60px 0px #0b0b0b1a;
   display: flex;
   flex-direction: column;
   height: 300px;
@@ -159,7 +160,7 @@ watch(width, (value) => {
 }
 
 .result {
-  color: white;
+  color: var(--color-white);
   font-size: 1.875rem;
 
   .result-symbol {
@@ -179,7 +180,7 @@ watch(width, (value) => {
 .calculator-button {
   border-radius: 100%;
   border: none;
-  color: white;
+  color: var(--color-white);
   font-size: 1.563rem;
   height: 65px;
   width: 65px;

@@ -1,7 +1,15 @@
-/* color palette from <https://github.com/vuejs/theme> */
+/* color palette from <https://github.com/vuejs/theme> + custom */
 :root {
   --vt-c-white: #ffffff;
   --vt-c-black: #181818;
+
+  --color-gray-600: #9e9c9c;
+  --color-gray-400: #6b6a6a;
+  --color-gray-350: #5a5757;
+  --color-gray-250: #414141;
+  --color-gray-050: #0b0b0b;
+
+  --color-white: var(--vt-c-white);
 }
 
 /* semantic color variables for this project */

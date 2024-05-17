@@ -27,18 +27,18 @@ defineProps<{
 }
 
 .button:not(.button.as-icon) {
-  color: white;
+  color: var(--color-white);
 }
 
 .button.primary:not(.button.as-icon) {
-  background-color: #5a5757;
-  box-shadow: 5px 5px 40px 0px rgba(11, 11, 11, 0.3);
+  background-color: var(--color-gray-350);
+  box-shadow: 5px 5px 40px 0px #0b0b0b4d;
 }
 
 .button.secondary:not(.button.as-icon) {
-  background-color: #3f3f3f;
-  box-shadow: 4px 3px 20px 0px rgba(0, 0, 0, 0.5);
-  box-shadow: -4px -2px 20px 0px rgba(195, 193, 191, 0.2);
+  background-color: var(--color-gray-250);
+  box-shadow: 4px 3px 20px 0px #00000080;
+  box-shadow: -4px -2px 20px 0px #c3c1bf33;
 }
 
 .button.as-icon {
