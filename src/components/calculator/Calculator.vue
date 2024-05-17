@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { inject, type Ref, watch, ref } from 'vue'
+import { inject, type Ref, watch, ref, onBeforeUnmount, onMounted } from 'vue'
 import {
   type CalculatorActions,
   type CalculatorButton,
@@ -283,6 +283,22 @@ watch(inputData, (value) => {
 
   input1Width.value = calculateInputWidth(value1)
   input2Width.value = calculateInputWidth(value2)
+})
+
+const focusInput = () => {
+  if (inputData.currentInputActive === 'value1') {
+    input1.value.focus()
+  } else {
+    input2.value.focus()
+  }
+}
+
+onMounted(() => {
+  window.addEventListener('keydown', focusInput)
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('keydown', focusInput)
 })
 </script>
 
