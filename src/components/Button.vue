@@ -4,6 +4,7 @@ defineProps<{
   type?: 'Primary' | 'Secondary'
 }>()
 </script>
+
 <template>
   <button
     class="button"
