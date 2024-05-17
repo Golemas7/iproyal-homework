@@ -176,22 +176,22 @@ const handleButtonClick = (buttonValue: CalculatorButton) => {
 
 // TODO HANDLE ACCESSIBILITY CASES
 // Instead of holding the users focus, we could just use the active variable to add to value
-const onInputBlur = (e: Event, valueName: InputType) => {
-  // We set a timeout, so click will register first before we start processing if new input was clicked. We need this, because the blur event is fired first.
-  setTimeout(() => {
-    if (inputData.currentInputActive === valueName) {
-      const input = e.target as HTMLInputElement
+// const onInputBlur = (e: Event, valueName: InputType) => {
+//   // We set a timeout, so click will register first before we start processing if new input was clicked. We need this, because the blur event is fired first.
+//   setTimeout(() => {
+//     if (inputData.currentInputActive === valueName) {
+//       const input = e.target as HTMLInputElement
 
-      inputData.currentInputActive = valueName
-      input.focus()
+//       inputData.currentInputActive = valueName
+//       input.focus()
 
-      // Browser limitation, sometimes we need to wait for blur to finish
-      setTimeout(() => {
-        input.focus()
-      }, 100)
-    }
-  }, 100)
-}
+//       // Browser limitation, sometimes we need to wait for blur to finish
+//       setTimeout(() => {
+//         input.focus()
+//       }, 100)
+//     }
+//   }, 100)
+// }
 
 const onFocusChanged = (valueName: InputType) => {
   inputData.currentInputActive = valueName
@@ -200,12 +200,13 @@ const onFocusChanged = (valueName: InputType) => {
 // Check validity of keyboard input keys and remap some to appropriate ones
 const onKeyboardInput = (e: KeyboardEvent) => {
   const key = e.key.toUpperCase()
-  const validKeys = ['C', '^', '/', 'X', '-', '+', '=', 'TAB', '*', 'ENTER']
+
+  const validKeys = ['C', '^', '/', 'X', '-', '+', '=', ' ', '*', 'ENTER']
 
   if (validKeys.includes(key)) {
     let validKey = key
 
-    if (key === 'TAB') {
+    if (key === ' ') {
       validKey = '↹'
     } else if (key === '*' || key === 'X') {
       validKey = 'x'
@@ -219,6 +220,11 @@ const onKeyboardInput = (e: KeyboardEvent) => {
 
 // Filter out what gets through to the input
 const onIputKeyDown = (e: KeyboardEvent, currentValue = '') => {
+  // Let user navigate using tabs and shift tabs
+  if (e.key === 'Tab' || e.key === 'Shift') {
+    return
+  }
+
   const isANumber = !Number.isNaN(parseInt(e.key, 10))
   const ignoreButton = shouldIgnoreButtonInput({
     key: e.key,
@@ -248,8 +254,18 @@ const onIputKeyDown = (e: KeyboardEvent, currentValue = '') => {
   }
 }
 
+const onActionChanged = () => {
+  if (resultAndAction.action && resultAndAction.result) {
+    resultAndAction.result = ''
+  }
+}
+
 // Focus input when entering using a keyboard to prevent user not typing anything in case of lost focus
-const focusInput = () => {
+const focusInput = (e: KeyboardEvent) => {
+  if (e.key === 'Tab' || e.key === 'Shift' || e.key === 'Enter') {
+    return
+  }
+
   if (inputData.currentInputActive === 'value1') {
     input1.value.focus()
   } else {
@@ -318,11 +334,16 @@ onBeforeUnmount(() => {
       class="calculator-input"
       placeholder="0"
       @keydown="(e) => onIputKeyDown(e, inputData.value1)"
-      @blur="(e) => onInputBlur(e, 'value1')"
       @click="onFocusChanged('value1')"
     />
     <label class="sr-only" for="action">The operation of the calculation</label>
-    <select v-model="resultAndAction.action" id="action" class="calculator-select" placeholder="_">
+    <select
+      v-model="resultAndAction.action"
+      id="action"
+      class="calculator-select"
+      placeholder="_"
+      @change="onActionChanged"
+    >
       <option value="" disabled selected hidden>_</option>
       <option :key="action" v-for="action in actions" :value="action">{{ action }}</option>
     </select>
@@ -336,7 +357,6 @@ onBeforeUnmount(() => {
       placeholder="0"
       class="calculator-input"
       @keydown="(e) => onIputKeyDown(e, inputData.value2)"
-      @blur="(e) => onInputBlur(e, 'value2')"
       @click="onFocusChanged('value2')"
     />
   </div>
