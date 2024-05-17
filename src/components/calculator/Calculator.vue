@@ -304,7 +304,7 @@ onBeforeUnmount(() => {
 
 <template>
   <div v-if="!isHistoryMode" class="calculator-calculations" @keydown="onKeyboardInput">
-    <label class="sr-only" for="value1"></label>
+    <label class="sr-only" for="value1">First number of the equasion</label>
     <input
       id="value1"
       ref="input1"
@@ -319,7 +319,9 @@ onBeforeUnmount(() => {
       @click="onFocusChanged('value1')"
     />
     <span class="calculator-action">{{ resultAndAction.action.toLocaleLowerCase() || '_' }}</span>
+    <label class="sr-only" for="value2">Second number of the equasion</label>
     <input
+      id="value2"
       ref="input2"
       :style="{ width: input2Width }"
       type="text"
